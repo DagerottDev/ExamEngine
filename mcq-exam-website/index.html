@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCQ Exam Viewer</title>
+<style>
+/* ============================================================
+   MCQ Exam Viewer — classic exam-paper styling
+   Fonts: serif for exam content (Georgia/Times), sans for chrome
+   Colors: warm paper, deep ink, exam blue accent, red margin
+   ============================================================ */
+
+:root {
+  --paper: #f6f3ea;          /* page background */
+  --sheet: #fffdf7;          /* exam sheet */
+  --ink: #23202a;            /* body text */
+  --ink-soft: #5b5764;       /* secondary text */
+  --line: #ddd6c4;           /* hairlines */
+  --accent: #1a3a6b;         /* deep exam blue */
+  --accent-dark: #122a50;
+  --accent-soft: #e8eef8;
+  --red: #b3261e;            /* exam margin / errors */
+  --green: #1c7c3c;
+  --amber: #b45309;
+  --serif: Georgia, "Times New Roman", Cambria, "Palatino Linotype", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* The hidden attribute must always win over any display rule (e.g. .view's
+   display:flex), otherwise hidden views/modal stay visible and block clicks. */
+[hidden] { display: none !important; }
+
+body {
+  font-family: var(--sans);
+  background:
+    radial-gradient(circle at 15% 10%, rgba(26, 58, 107, 0.06), transparent 45%),
+    var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+.view { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+
+/* ---------------- Landing ---------------- */
+
+.landing-card {
+  width: min(680px, 100%);
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(60, 45, 20, 0.12);
+  padding: 40px 40px 32px;
+  text-align: center;
+}
+
+.landing-emblem {
+  width: 72px; height: 72px; margin: 0 auto 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--serif);
+  font-size: 26px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  letter-spacing: 1px;
+  box-shadow: 0 8px 18px rgba(26, 58, 107, 0.35);
+}
+
+.landing-card h1 {
+  font-family: var(--serif);
+  font-size: 30px;
+  color: var(--accent-dark);
+  letter-spacing: 0.3px;
+}
+
+.landing-tag { color: var(--ink-soft); margin-top: 6px; font-size: 15px; }
+
+.drop-zone {
+  margin: 26px auto 0;
+  padding: 34px 20px;
+  border: 2px dashed #b9b09a;
+  border-radius: 12px;
+  background: #fbf8f0;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  outline: none;
+}
+.drop-zone:hover, .drop-zone:focus-visible, .drop-zone.dragover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.drop-zone.dragover { transform: scale(1.01); }
+
+.drop-icon { font-size: 34px; color: var(--accent); line-height: 1; }
+.drop-title { margin-top: 10px; font-size: 17px; }
+.drop-title code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  background: #efe9da; padding: 2px 6px; border-radius: 5px; font-size: 14px;
+}
+.drop-sub { margin-top: 6px; font-size: 13.5px; color: var(--ink-soft); }
+.link-like { color: var(--accent); font-weight: 600; text-decoration: underline; }
+
+.landing-actions { margin-top: 20px; }
+
+.upload-error {
+  margin-top: 18px;
+  background: #fdeceb;
+  border: 1px solid #f3b8b3;
+  color: #8c1d16;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  text-align: left;
+  white-space: pre-wrap;
+}
+.upload-error:not([hidden]) { display: block; }
+.upload-error strong { display: block; margin-bottom: 4px; }
+
+.format-note { margin-top: 24px; text-align: left; }
+.format-note summary { cursor: pointer; color: var(--accent); font-size: 13.5px; font-weight: 600; }
+.format-note pre {
+  margin-top: 10px; padding: 14px;
+  background: #2b2a33; color: #e8e6df;
+  border-radius: 10px; font-size: 12px; line-height: 1.55;
+  overflow-x: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* ---------------- Buttons ---------------- */
+
+.btn {
+  font-family: var(--sans);
+  font-size: 14.5px; font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, transform 0.08s;
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); }
+
+.btn-secondary { background: var(--sheet); color: var(--accent); border-color: var(--accent); }
+.btn-secondary:hover { background: var(--accent-soft); }
+
+.btn-ghost { background: transparent; color: var(--accent); }
+.btn-ghost:hover { background: var(--accent-soft); }
+
+/* ---------------- Exam window ---------------- */
+
+.exam-shell {
+  width: min(1060px, 100%);
+  display: flex; flex-direction: column;
+  min-height: calc(100vh - 48px);
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 20px 55px rgba(60, 45, 20, 0.16);
+  overflow: hidden;
+}
+
+.exam-header {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px; flex-wrap: wrap;
+  padding: 18px 26px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: #fff;
+}
+.exam-header h2 { font-family: var(--serif); font-size: 21px; letter-spacing: 0.3px; }
+.exam-meta { margin-top: 5px; font-size: 13px; color: #cbd7ec; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.type-badge {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 1px 9px; border-radius: 20px;
+  font-size: 11.5px; letter-spacing: 0.4px; text-transform: uppercase;
+}
+
+.exam-header-right { text-align: right; }
+.exam-timer {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 26px; font-weight: 700;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 3px 14px; border-radius: 8px;
+  display: inline-block;
+  min-width: 96px;
+}
+.exam-timer.low { color: #ffd7d3; animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: 0.55; } }
+.exam-progress { margin-top: 6px; font-size: 12.5px; color: #cbd7ec; }
+
+.exam-instructions {
+  padding: 12px 26px;
+  background: #f2ecd9;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--serif);
+  font-size: 14px; font-style: italic;
+  color: #4a4432;
+}
+.exam-instructions:not([hidden]) { display: block; }
+
+.exam-body { flex: 1; display: flex; align-items: stretch; min-height: 0; }
+
+/* palette */
+.exam-palette {
+  width: 210px;
+  flex-shrink: 0;
+  padding: 20px 18px;
+  border-right: 1px solid var(--line);
+  background: #faf7ef;
+  overflow-y: auto;
+}
+.exam-palette h3 {
+  font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--ink-soft); margin-bottom: 14px;
+}
+.palette-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.palette-btn {
+  aspect-ratio: 1;
+  border: 1.5px solid #c9c2ae;
+  background: var(--sheet);
+  color: var(--ink);
+  border-radius: 8px;
+  font-family: var(--serif);
+  font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.palette-btn:hover { border-color: var(--accent); }
+.palette-btn.current {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(26, 58, 107, 0.25);
+  background: var(--accent-soft);
+}
+.palette-btn.answered { background: var(--accent); border-color: var(--accent); color: #fff; }
+.palette-btn.answered.current { box-shadow: 0 0 0 2px rgba(26, 58, 107, 0.35); }
+.palette-btn.flagged { position: relative; }
+.palette-btn.flagged::after {
+  content: "";
+  position: absolute; top: -3px; right: -3px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--amber);
+  border: 2px solid var(--sheet);
+}
+.palette-legend {
+  margin-top: 16px;
+  display: flex; flex-direction: column; gap: 6px;
+  font-size: 11.5px; color: var(--ink-soft);
+}
+.palette-legend span { display: flex; align-items: center; gap: 7px; }
+.swatch { width: 13px; height: 13px; border-radius: 4px; display: inline-block; }
+.swatch-answered { background: var(--accent); }
+.swatch-flagged { background: var(--amber); }
+.swatch-current { border: 1.5px solid var(--accent); background: var(--accent-soft); }
+
+/* question sheet */
+.question-sheet {
+  flex: 1;
+  padding: 30px 38px 24px;
+  position: relative;
+  overflow-y: auto;
+  min-width: 0;
+}
+/* classic red margin line down the left of the paper */
+.question-sheet::before {
+  content: "";
+  position: absolute;
+  top: 18px; bottom: 18px; left: 22px;
+  width: 2.5px;
+  background: var(--red);
+  border-radius: 2px;
+  opacity: 0.55;
+}
+
+.question-topline {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+  padding-left: 26px;
+}
+.question-number {
+  font-family: var(--serif);
+  font-size: 20px; font-weight: 700;
+  color: var(--accent-dark);
+}
+.flag-btn {
+  background: transparent; border: 1px solid #cfc6ae;
+  color: var(--ink-soft);
+  font-size: 12.5px; padding: 6px 12px; border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.flag-btn:hover { border-color: var(--amber); color: var(--amber); }
+.flag-btn.flagged { background: #fdf3e0; border-color: var(--amber); color: var(--amber); font-weight: 600; }
+
+.question-text {
+  font-family: var(--serif);
+  font-size: 18.5px;
+  line-height: 1.65;
+  padding-left: 26px;
+  margin-bottom: 22px;
+}
+
+.options-list { display: flex; flex-direction: column; gap: 12px; padding-left: 26px; }
+
+.option-row {
+  display: flex; align-items: flex-start; gap: 14px;
+  border: 1.5px solid #d8d0ba;
+  border-radius: 10px;
+  padding: 13px 16px;
+  cursor: pointer;
+  background: #fffef9;
+  transition: border-color 0.1s, background 0.1s, box-shadow 0.1s;
+  font-family: var(--serif);
+  font-size: 16.5px;
+}
+.option-row:hover { border-color: var(--accent); background: var(--accent-soft); }
+.option-row.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 2px rgba(26, 58, 107, 0.18);
+}
+.option-badge {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  border: 1.5px solid #bfb79f;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px;
+  color: var(--ink-soft);
+  background: #fff;
+  font-family: var(--serif);
+}
+.option-row.selected .option-badge { background: var(--accent); border-color: var(--accent); color: #fff; }
+.option-text { flex: 1; padding-top: 3px; }
+
+.question-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 30px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  padding-left: 26px;
+}
+
+/* footer */
+.exam-footer {
+  padding: 14px 26px;
+  border-top: 1px solid var(--line);
+  background: #faf7ef;
+  display: flex; justify-content: flex-end;
+}
+
+/* ---------------- Result ---------------- */
+
+.result-card {
+  width: min(760px, 100%);
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(60, 45, 20, 0.12);
+  padding: 34px 40px;
+}
+.result-card h2 {
+  font-family: var(--serif);
+  font-size: 24px; color: var(--accent-dark);
+  margin-bottom: 22px; text-align: center;
+}
+.result-score-row { display: flex; align-items: center; justify-content: center; gap: 26px; }
+.score-circle {
+  width: 128px; height: 128px;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) var(--pct, 0%), #e6e0cf 0);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 800; color: var(--accent-dark);
+  position: relative;
+  font-family: var(--serif);
+}
+.score-circle::before { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: var(--sheet); }
+.score-circle span { position: relative; }
+.score-fraction { font-size: 20px; font-weight: 700; color: var(--ink); }
+.score-grade { font-size: 15px; color: var(--ink-soft); margin-top: 4px; }
+
+.score-stats { display: flex; justify-content: center; gap: 30px; margin: 26px 0; }
+.stat { font-size: 13px; color: var(--ink-soft); text-align: center; }
+.stat b { display: block; font-size: 22px; font-family: var(--serif); }
+.stat-correct b { color: var(--green); }
+.stat-wrong b { color: var(--red); }
+.stat-skipped b { color: var(--ink-soft); }
+
+.result-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+.review-list { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 20px; }
+.review-list:not([hidden]) { display: block; }
+.review-item {
+  border: 1.5px solid var(--line);
+  border-left-width: 5px;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  background: #fffef9;
+}
+.review-item.correct { border-left-color: var(--green); }
+.review-item.wrong { border-left-color: var(--red); }
+.review-item.skipped { border-left-color: var(--amber); }
+.review-q { font-family: var(--serif); font-size: 16.5px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
+.review-answers { font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
+.review-answers .yours { color: var(--red); font-weight: 600; }
+.review-answers .yours.ok { color: var(--green); }
+.review-answers .correct-ans { color: var(--green); font-weight: 600; }
+.review-explanation {
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px dashed #e0d9c6;
+  font-size: 13.5px; color: var(--ink-soft);
+  font-family: var(--serif);
+}
+
+/* ---------------- Modal ---------------- */
+
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(25, 22, 30, 0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+.modal-backdrop:not([hidden]) { display: flex; }
+.modal {
+  width: min(430px, 100%);
+  background: var(--sheet);
+  border-radius: 14px;
+  padding: 26px 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+}
+.modal h3 { font-family: var(--serif); font-size: 20px; color: var(--accent-dark); }
+.modal p { margin-top: 10px; font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+
+/* ---------------- Responsive ---------------- */
+
+@media (max-width: 760px) {
+  .exam-body { flex-direction: column; }
+  .exam-palette { width: 100%; border-right: none; border-bottom: 1px solid var(--line); padding: 14px 20px; }
+  .palette-grid { grid-template-columns: repeat(8, 1fr); }
+  .question-sheet { padding: 22px 18px; }
+  .question-sheet::before { left: 10px; }
+  .question-text, .options-list, .question-topline, .question-nav { padding-left: 14px; }
+  .landing-card { padding: 28px 20px; }
+  .result-card { padding: 26px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LANDING / UPLOAD VIEW ============ -->
+<section id="landing-view" class="view">
+  <div class="landing-card">
+    <div class="landing-brand">
+      <div class="landing-emblem">MCQ</div>
+      <h1>Exam Paper Viewer</h1>
+      <p class="landing-tag">Upload an MCQ JSON pack and take the exam in a real paper-style window.</p>
+    </div>
+
+    <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Upload JSON pack">
+      <input type="file" id="file-input" accept=".json,application/json" hidden>
+      <div class="drop-icon" aria-hidden="true">⇪</div>
+      <p class="drop-title">Drop your <code>.json</code> pack here</p>
+      <p class="drop-sub">or <span class="link-like">browse files</span> — any pack generated by the <em>mcq-pack-generator</em> skill</p>
+    </div>
+
+    <div class="landing-actions">
+      <button id="load-sample-btn" class="btn btn-secondary" type="button">Load sample pack</button>
+    </div>
+
+    <div id="upload-error" class="upload-error" hidden></div>
+
+    <details class="format-note">
+      <summary>Expected JSON format</summary>
+      <pre>{
+  "exam": { "title": "...", "subject": "...", "examType": "Mock Test",
+            "durationMinutes": 60, "totalMarks": 20, "instructions": "..." },
+  "difficulty": "moderate",
+  "source": { "book": "...", "chapter": "...", "paperYear": "2025" },
+  "questions": [
+    { "id": 1, "question": "...", "options": ["a", "b", "c", "d"],
+      "answerIndex": 2, "explanation": "...", "topic": "...", "marks": 1 }
+  ]
+}</pre>
+    </details>
+  </div>
+</section>
+
+<!-- ============ EXAM VIEW ============ -->
+<section id="exam-view" class="view" hidden>
+  <div class="exam-shell">
+    <header class="exam-header">
+      <div class="exam-header-left">
+        <h2 id="exam-title">Exam</h2>
+        <p class="exam-meta">
+          <span id="exam-subject" class="meta-item"></span>
+          <span id="exam-type-badge" class="type-badge"></span>
+          <span class="meta-item">Difficulty: <span id="exam-difficulty"></span></span>
+        </p>
+      </div>
+      <div class="exam-header-right">
+        <div id="exam-timer" class="exam-timer" title="Time remaining">15:00</div>
+        <div class="exam-progress">Question <span id="q-current">1</span> of <span id="q-total">0</span></div>
+      </div>
+    </header>
+
+    <div id="exam-instructions" class="exam-instructions" hidden></div>
+
+    <main class="exam-body">
+      <aside class="exam-palette" aria-label="Question palette">
+        <h3>Question Palette</h3>
+        <div id="palette-grid" class="palette-grid"></div>
+        <div class="palette-legend">
+          <span><i class="swatch swatch-answered"></i>Answered</span>
+          <span><i class="swatch swatch-flagged"></i>Flagged</span>
+          <span><i class="swatch swatch-current"></i>Current</span>
+        </div>
+      </aside>
+
+      <section class="question-sheet">
+        <div class="question-topline">
+          <span class="question-number" id="q-number">Q1</span>
+          <button id="flag-btn" class="flag-btn" type="button">⚑ Flag for review</button>
+        </div>
+        <p id="question-text" class="question-text"></p>
+        <div id="options-list" class="options-list"></div>
+
+        <div class="question-nav">
+          <button id="prev-btn" class="btn btn-ghost" type="button">← Previous</button>
+          <div class="nav-spacer"></div>
+          <button id="next-btn" class="btn btn-ghost" type="button">Next →</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="exam-footer">
+      <button id="submit-btn" class="btn btn-primary" type="button">Submit Exam</button>
+    </footer>
+  </div>
+</section>
+
+<!-- ============ RESULT VIEW ============ -->
+<section id="result-view" class="view" hidden>
+  <div class="result-card">
+    <h2 id="result-title">Result</h2>
+    <div class="result-score-row">
+      <div class="score-circle" id="score-circle">0%</div>
+      <div class="score-detail">
+        <p class="score-fraction" id="score-fraction">0 / 0</p>
+        <p class="score-grade" id="score-grade">—</p>
+      </div>
+    </div>
+    <div class="score-stats">
+      <div class="stat stat-correct"><b id="stat-correct">0</b>Correct</div>
+      <div class="stat stat-wrong"><b id="stat-wrong">0</b>Wrong</div>
+      <div class="stat stat-skipped"><b id="stat-skipped">0</b>Unanswered</div>
+    </div>
+    <div class="result-actions">
+      <button id="review-btn" class="btn btn-primary" type="button">Review Answers</button>
+      <button id="restart-btn" class="btn btn-secondary" type="button">Take Again</button>
+      <button id="home-btn" class="btn btn-ghost" type="button">Upload Another Pack</button>
+    </div>
+    <div id="review-list" class="review-list" hidden></div>
+  </div>
+</section>
+
+<!-- Confirm submit modal -->
+<div id="confirm-modal" class="modal-backdrop" hidden>
+  <div class="modal">
+    <h3 id="modal-title">Submit Exam?</h3>
+    <p id="modal-text"></p>
+    <div class="modal-actions">
+      <button id="modal-cancel" class="btn btn-ghost" type="button">Keep Working</button>
+      <button id="modal-confirm" class="btn btn-primary" type="button">Submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   MCQ Exam Viewer — application logic (vanilla JS, no deps)
+   ============================================================ */
+
+/* Embedded sample pack — try the exam window with one click,
+   even when the page is opened straight from disk (file://). */
+const SAMPLE_PACK = {
+  exam: {
+    title: "Cell Biology — Unit Test",
+    subject: "Biology",
+    examType: "Mock Test",
+    durationMinutes: 15,
+    totalMarks: 8,
+    instructions: "Each question carries 1 mark. Choose the single best option. No negative marking.",
+    difficultyNote: "Calibrated from 3 sample questions of the 2025 paper: recall-based with a few application items."
+  },
+  difficulty: "moderate",
+  source: {
+    book: "NCERT Biology — Class XI",
+    chapter: "Cell: The Unit of Life",
+    paperYear: "2025"
+  },
+  questions: [
+    { id: 1, question: "Which of the following is the main site of ATP synthesis in a eukaryotic cell?", options: ["Rough endoplasmic reticulum", "Mitochondria", "Golgi apparatus", "Lysosome"], answerIndex: 1, explanation: "Mitochondria are the powerhouse of the cell; oxidative phosphorylation and most ATP generation occur on their inner membrane.", topic: "Cell organelles", marks: 1 },
+    { id: 2, question: "Ribosomes are composed of which of the following?", options: ["RNA and proteins", "DNA and proteins", "Lipids and RNA", "Only proteins"], answerIndex: 0, explanation: "Ribosomes are nucleoprotein complexes made of ribosomal RNA (rRNA) and proteins, assembled in the nucleolus.", topic: "Cell organelles", marks: 1 },
+    { id: 3, question: "Which organelle is responsible for the intracellular digestion of worn-out organelles and foreign material?", options: ["Peroxisome", "Lysosome", "Vacuole", "Centrosome"], answerIndex: 1, explanation: "Lysosomes contain hydrolytic enzymes (acid hydrolases) that digest macromolecules, worn-out organelles, and engulfed pathogens.", topic: "Cell organelles", marks: 1 },
+    { id: 4, question: "The semifluid matrix filling the space between the nuclear envelope and the cell membrane is called the:", options: ["Nucleoplasm", "Cytosol", "Cytoplasm", "Protoplasm"], answerIndex: 2, explanation: "Cytoplasm is the semifluid matrix between the nuclear envelope and plasma membrane; cytosol is its soluble part excluding organelles.", topic: "Cell structure", marks: 1 },
+    { id: 5, question: "Which of the following cell organelles is bounded by a single membrane?", options: ["Mitochondria", "Plastids", "Lysosomes", "Nucleus"], answerIndex: 2, explanation: "Lysosomes are single-membrane-bound organelles; mitochondria, plastids, and the nucleus have double membranes.", topic: "Cell organelles", marks: 1 },
+    { id: 6, question: "Which of the following statements about the cell wall is correct?", options: ["It is present in animal cells and made of cholesterol", "It is found in plant cells and provides structural support", "It regulates the movement of all molecules in and out of the cell", "It is a selectively permeable membrane made of phospholipids"], answerIndex: 1, explanation: "Plant cell walls are made chiefly of cellulose, provide rigidity and support, and are freely permeable — unlike the plasma membrane.", topic: "Cell structure", marks: 1 },
+    { id: 7, question: "A student observes a cell with a prominent nucleus, a large central vacuole, and a cell wall. The cell is most likely a:", options: ["Red blood cell", "Neuron", "Plant cell", "Bacterial cell"], answerIndex: 2, explanation: "A cell wall and large central vacuole are characteristic of mature plant cells; RBCs, neurons, and bacteria lack both together.", topic: "Cell structure", marks: 1 },
+    { id: 8, question: "The structural organisation of the nucleus includes the nuclear envelope, nucleoplasm, nucleolus, and:", options: ["Chromatin", "Plasmodesmata", "Peroxisomes", "Microtubules"], answerIndex: 0, explanation: "The nucleus comprises the nuclear envelope, nucleoplasm, nucleolus, and chromatin (DNA + histone proteins).", topic: "Nucleus", marks: 1 }
+  ]
+};
+
+/* ---------------- State ---------------- */
+const state = {
+  pack: null,
+  current: 0,             // index into pack.questions
+  answers: new Map(),     // question id -> chosen option index
+  flagged: new Set(),     // question ids flagged for review
+  timerId: null,
+  timeLeft: 0,            // seconds
+  submitted: false,
+  results: [],
+};
+
+/* ---------------- DOM refs ---------------- */
+const $ = (id) => document.getElementById(id);
+const views = {
+  landing: $("landing-view"),
+  exam: $("exam-view"),
+  result: $("result-view"),
+};
+
+/* ---------------- Validation (mirrors scripts/validate_pack.py) ---------------- */
+const EXAM_TYPES = ["Quiz", "Midterm", "Final", "Mock Test", "Practice", "Other"];
+const DIFFICULTIES = ["easy", "moderate", "hard", "mixed"];
+
+function validatePack(data) {
+  const problems = [];
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    return ["Top level must be a JSON object."];
+  }
+
+  const exam = data.exam;
+  if (typeof exam !== "object" || exam === null) {
+    problems.push("Missing required object: 'exam'.");
+  } else {
+    ["title", "subject", "examType", "durationMinutes", "totalMarks"].forEach((f) => {
+      if (!(f in exam)) problems.push(`'exam' is missing required field: '${f}'.`);
+    });
+    if (typeof exam.title === "string" && !exam.title.trim()) problems.push("'exam.title' must not be empty.");
+    if (typeof exam.subject === "string" && !exam.subject.trim()) problems.push("'exam.subject' must not be empty.");
+    if (!EXAM_TYPES.includes(exam.examType)) {
+      problems.push(`'exam.examType' must be one of ${EXAM_TYPES.join(", ")}; got "${exam.examType}".`);
+    }
+    if (!Number.isInteger(exam.durationMinutes) || exam.durationMinutes < 1) {
+      problems.push(`'exam.durationMinutes' must be an integer >= 1; got ${exam.durationMinutes}.`);
+    }
+    if (!Number.isInteger(exam.totalMarks) || exam.totalMarks < 1) {
+      problems.push(`'exam.totalMarks' must be an integer >= 1; got ${exam.totalMarks}.`);
+    }
+  }
+
+  if (!DIFFICULTIES.includes(data.difficulty)) {
+    problems.push(`'difficulty' must be one of ${DIFFICULTIES.join(", ")}; got "${data.difficulty}".`);
+  }
+
+  const qs = data.questions;
+  if (!Array.isArray(qs) || qs.length === 0) {
+    problems.push("'questions' must be a non-empty array.");
+  } else {
+    const seenIds = new Set();
+    qs.forEach((q, i) => {
+      const where = `questions[${i}]`;
+      if (typeof q !== "object" || q === null) {
+        problems.push(`${where} must be an object.`);
+        return;
+      }
+      ["id", "question", "options", "answerIndex"].forEach((f) => {
+        if (!(f in q)) problems.push(`${where} is missing required field: '${f}'.`);
+      });
+      if (!Number.isInteger(q.id)) problems.push(`${where}.id must be an integer.`);
+      else if (seenIds.has(q.id)) problems.push(`${where}.id is duplicated: ${q.id}.`);
+      else seenIds.add(q.id);
+
+      if (typeof q.question !== "string" || !q.question.trim()) {
+        problems.push(`${where}.question must be a non-empty string.`);
+      }
+
+      const opts = q.options;
+      if (!Array.isArray(opts) || opts.length < 2) {
+        problems.push(`${where}.options must be an array with at least 2 options.`);
+      } else {
+        opts.forEach((o, j) => {
+          if (typeof o !== "string" || !o.trim()) problems.push(`${where}.options[${j}] must be a non-empty string.`);
+        });
+        const lowered = opts.filter((o) => typeof o === "string").map((o) => o.trim().toLowerCase());
+        if (new Set(lowered).size !== lowered.length) problems.push(`${where}.options contains duplicates.`);
+      }
+
+      if (!Number.isInteger(q.answerIndex)) {
+        problems.push(`${where}.answerIndex must be an integer.`);
+      } else if (Array.isArray(opts) && !(q.answerIndex >= 0 && q.answerIndex < opts.length)) {
+        problems.push(`${where}.answerIndex ${q.answerIndex} is out of range for ${opts.length} options (0-based).`);
+      }
+
+      if (q.marks != null && (!Number.isInteger(q.marks) || q.marks < 0)) {
+        problems.push(`${where}.marks must be a non-negative integer.`);
+      }
+    });
+  }
+  return problems;
+}
+
+/* ---------------- View switching ---------------- */
+function showView(name) {
+  Object.entries(views).forEach(([key, el]) => {
+    el.hidden = key !== name;
+  });
+  window.scrollTo(0, 0);
+}
+
+/* ---------------- Exam setup ---------------- */
+function startExam(pack) {
+  state.pack = pack;
+  state.current = 0;
+  state.answers = new Map();
+  state.flagged = new Set();
+  state.submitted = false;
+  if (state.timerId) clearInterval(state.timerId);
+
+  const ex = pack.exam;
+  $("exam-title").textContent = ex.title;
+  $("exam-subject").textContent = ex.subject;
+  $("exam-type-badge").textContent = ex.examType;
+  $("exam-difficulty").textContent = pack.difficulty;
+  $("q-total").textContent = String(pack.questions.length);
+
+  const inst = $("exam-instructions");
+  const parts = [];
+  if (ex.instructions) parts.push(ex.instructions);
+  if (ex.difficultyNote) parts.push(`Difficulty note: ${ex.difficultyNote}`);
+  if (pack.source && (pack.source.book || pack.source.chapter)) {
+    parts.push(`Source: ${pack.source.book || ""}${pack.source.chapter ? " — " + pack.source.chapter : ""}`);
+  }
+  inst.textContent = parts.join("  ·  ");
+  inst.hidden = parts.length === 0;
+
+  state.timeLeft = ex.durationMinutes * 60;
+  renderTimer();
+  state.timerId = setInterval(tick, 1000);
+
+  renderQuestion();
+  renderPalette();
+  showView("exam");
+}
+
+function tick() {
+  if (state.submitted) return;
+  state.timeLeft -= 1;
+  renderTimer();
+  if (state.timeLeft <= 0) {
+    clearInterval(state.timerId);
+    submitExam(true);
+  }
+}
+
+function renderTimer() {
+  const el = $("exam-timer");
+  const t = Math.max(0, state.timeLeft);
+  const mm = String(Math.floor(t / 60)).padStart(2, "0");
+  const ss = String(t % 60).padStart(2, "0");
+  el.textContent = `${mm}:${ss}`;
+  el.classList.toggle("low", t <= 60);
+}
+
+/* ---------------- Question rendering ---------------- */
+function renderQuestion() {
+  const q = state.pack.questions[state.current];
+  const n = state.pack.questions.length;
+  $("q-current").textContent = String(state.current + 1);
+  $("q-number").textContent = `Q${q.id}`;
+
+  const flagBtn = $("flag-btn");
+  const isFlagged = state.flagged.has(q.id);
+  flagBtn.classList.toggle("flagged", isFlagged);
+  flagBtn.textContent = isFlagged ? "⚑ Flagged" : "⚑ Flag for review";
+
+  $("question-text").textContent = q.question;
+
+  const list = $("options-list");
+  list.innerHTML = "";
+  const letters = "ABCDEFGH";
+  q.options.forEach((opt, i) => {
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "option-row" + (state.answers.get(q.id) === i ? " selected" : "");
+    row.setAttribute("aria-pressed", state.answers.get(q.id) === i ? "true" : "false");
+
+    const badge = document.createElement("span");
+    badge.className = "option-badge";
+    badge.textContent = letters[i] || String(i + 1);
+
+    const text = document.createElement("span");
+    text.className = "option-text";
+    text.textContent = opt;
+
+    row.append(badge, text);
+    row.addEventListener("click", () => selectOption(q.id, i));
+    list.appendChild(row);
+  });
+
+  $("prev-btn").disabled = state.current === 0;
+  $("next-btn").disabled = state.current === n - 1;
+}
+
+function selectOption(qid, idx) {
+  if (state.submitted) return;
+  state.answers.set(qid, idx);
+  renderQuestion();
+  renderPalette();
+}
+
+function renderPalette() {
+  const grid = $("palette-grid");
+  grid.innerHTML = "";
+  state.pack.questions.forEach((q, i) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "palette-btn";
+    btn.textContent = String(i + 1);
+    btn.title = `Question ${i + 1} (Q${q.id})`;
+    if (state.answers.has(q.id)) btn.classList.add("answered");
+    if (state.flagged.has(q.id)) btn.classList.add("flagged");
+    if (i === state.current) btn.classList.add("current");
+    btn.addEventListener("click", () => {
+      state.current = i;
+      renderQuestion();
+      renderPalette();
+    });
+    grid.appendChild(btn);
+  });
+}
+
+/* ---------------- Navigation / flagging ---------------- */
+function go(delta) {
+  const n = state.pack.questions.length;
+  const next = Math.min(n - 1, Math.max(0, state.current + delta));
+  if (next !== state.current) {
+    state.current = next;
+    renderQuestion();
+    renderPalette();
+  }
+}
+
+function toggleFlag() {
+  if (state.submitted) return;
+  const qid = state.pack.questions[state.current].id;
+  if (state.flagged.has(qid)) state.flagged.delete(qid);
+  else state.flagged.add(qid);
+  renderQuestion();
+  renderPalette();
+}
+
+/* ---------------- Submit + scoring ---------------- */
+function submitExam(auto = false) {
+  if (state.submitted) return;
+  const total = state.pack.questions.length;
+  const answered = state.pack.questions.filter((q) => state.answers.has(q.id)).length;
+  const unanswered = total - answered;
+
+  const doSubmit = () => {
+    if (state.timerId) clearInterval(state.timerId);
+    state.submitted = true;
+
+    let correct = 0;
+    const results = state.pack.questions.map((q) => {
+      const chosen = state.answers.get(q.id);
+      const isCorrect = chosen === q.answerIndex;
+      if (isCorrect) correct += 1;
+      return { q, chosen, isCorrect, skipped: chosen === undefined };
+    });
+
+    const pct = total ? Math.round((correct / total) * 100) : 0;
+    $("score-circle").style.setProperty("--pct", pct + "%");
+    $("score-circle").innerHTML = `<span>${pct}%</span>`;
+    $("score-fraction").textContent = `${correct} / ${total}`;
+    $("score-grade").textContent = gradeFor(pct);
+    $("stat-correct").textContent = String(correct);
+    $("stat-wrong").textContent = String(total - correct - unanswered);
+    $("stat-skipped").textContent = String(unanswered);
+    $("result-title").textContent = `${state.pack.exam.title} — Result`;
+
+    $("review-list").hidden = true;
+    $("review-list").innerHTML = "";
+    state.results = results;
+
+    showView("result");
+  };
+
+  if (auto) {
+    doSubmit();
+    return;
+  }
+
+  // Confirm dialog
+  $("modal-title").textContent = "Submit Exam?";
+  if (unanswered > 0) {
+    $("modal-text").textContent =
+      `You have answered ${answered} of ${total} questions and left ${unanswered} unanswered. ` +
+      `Unanswered questions will be marked as skipped. Submit anyway?`;
+  } else {
+    $("modal-text").textContent = `All ${total} questions answered. Ready to submit your exam?`;
+  }
+  $("confirm-modal").hidden = false;
+  $("modal-confirm").onclick = () => {
+    $("confirm-modal").hidden = true;
+    doSubmit();
+  };
+}
+
+function gradeFor(pct) {
+  if (pct >= 90) return "A — Excellent";
+  if (pct >= 75) return "B — Good";
+  if (pct >= 60) return "C — Fair";
+  if (pct >= 40) return "D — Needs improvement";
+  return "F — Keep practising";
+}
+
+function renderReview() {
+  const list = $("review-list");
+  list.innerHTML = "";
+  const letters = "ABCDEFGH";
+
+  state.results.forEach(({ q, chosen, isCorrect, skipped }, i) => {
+    const item = document.createElement("div");
+    item.className = `review-item ${skipped ? "skipped" : isCorrect ? "correct" : "wrong"}`;
+
+    const qEl = document.createElement("p");
+    qEl.className = "review-q";
+    qEl.textContent = `Q${i + 1}. ${q.question}${q.marks ? `  [${q.marks} mark${q.marks > 1 ? "s" : ""}]` : ""}`;
+
+    const ansEl = document.createElement("div");
+    ansEl.className = "review-answers";
+    const optText = (idx) => `${letters[idx] || idx + 1}. ${q.options[idx]}`;
+
+    if (skipped) {
+      const p = document.createElement("span");
+      p.textContent = "Not answered.";
+      p.className = "yours";
+      ansEl.appendChild(p);
+    } else {
+      const p = document.createElement("span");
+      p.textContent = `Your answer: ${optText(chosen)}`;
+      p.className = "yours" + (isCorrect ? " ok" : "");
+      ansEl.appendChild(p);
+    }
+    if (!isCorrect) {
+      const p = document.createElement("span");
+      p.textContent = `Correct answer: ${optText(q.answerIndex)}`;
+      p.className = "correct-ans";
+      ansEl.appendChild(p);
+    }
+    item.appendChild(qEl);
+    item.appendChild(ansEl);
+
+    if (q.explanation) {
+      const ex = document.createElement("p");
+      ex.className = "review-explanation";
+      ex.textContent = `Explanation: ${q.explanation}`;
+      item.appendChild(ex);
+    }
+    list.appendChild(item);
+  });
+
+  list.hidden = false;
+}
+
+/* ---------------- File upload ---------------- */
+function showError(title, problems) {
+  const el = $("upload-error");
+  el.innerHTML = "";
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  el.appendChild(strong);
+  const p = document.createElement("span");
+  p.textContent = problems.join("\n");
+  el.appendChild(p);
+  el.hidden = false;
+}
+
+function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      const problems = validatePack(data);
+      if (problems.length > 0) {
+        showError(`"${file.name}" is not a valid MCQ pack (${problems.length} problem${problems.length > 1 ? "s" : ""}):`, problems);
+        return;
+      }
+      startExam(data);
+    } catch (e) {
+      showError(`"${file.name}" is not valid JSON:`, [e.message]);
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ---------------- Event wiring ---------------- */
+const fileInput = $("file-input");
+const dropZone = $("drop-zone");
+
+dropZone.addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", () => {
+  if (fileInput.files[0]) handleFile(fileInput.files[0]);
+  fileInput.value = "";
+});
+
+["dragenter", "dragover"].forEach((ev) =>
+  dropZone.addEventListener(ev, (e) => {
+    e.preventDefault();
+    dropZone.classList.add("dragover");
+  })
+);
+["dragleave", "drop"].forEach((ev) =>
+  dropZone.addEventListener(ev, (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("dragover");
+  })
+);
+dropZone.addEventListener("drop", (e) => {
+  const file = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+$("load-sample-btn").addEventListener("click", () => startExam(SAMPLE_PACK));
+
+$("prev-btn").addEventListener("click", () => go(-1));
+$("next-btn").addEventListener("click", () => go(1));
+$("flag-btn").addEventListener("click", toggleFlag);
+$("submit-btn").addEventListener("click", () => submitExam(false));
+$("modal-cancel").addEventListener("click", () => ($("confirm-modal").hidden = true));
+
+$("review-btn").addEventListener("click", () => {
+  if ($("review-list").hidden) renderReview();
+  else $("review-list").hidden = true;
+});
+$("restart-btn").addEventListener("click", () => startExam(state.pack));
+$("home-btn").addEventListener("click", () => {
+  if (state.timerId) clearInterval(state.timerId);
+  showView("landing");
+});
+
+// Keyboard shortcuts
+document.addEventListener("keydown", (e) => {
+  if (views.exam.hidden) return;
+  if (e.key === "ArrowLeft") go(-1);
+  else if (e.key === "ArrowRight") go(1);
+  else if (e.key === "f" || e.key === "F") toggleFlag();
+  else if (/^[a-dA-D]$/.test(e.key)) {
+    const idx = e.key.toLowerCase().charCodeAt(0) - 97;
+    const q = state.pack.questions[state.current];
+    if (idx < q.options.length) selectOption(q.id, idx);
+  }
+});
+</script>
+</body>
+</html>

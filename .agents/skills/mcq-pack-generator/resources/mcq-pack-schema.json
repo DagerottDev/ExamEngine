@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.invalid/mcq-pack-schema.json",
+  "title": "MCQ Pack",
+  "description": "A JSON pack of multiple-choice questions generated from book chapter screenshots and sample exam questions, with difficulty calibrated to match the source paper.",
+  "type": "object",
+  "required": ["exam", "difficulty", "questions"],
+  "properties": {
+    "exam": {
+      "type": "object",
+      "description": "Exam-level metadata shown in the exam viewer header.",
+      "required": ["title", "subject", "examType", "durationMinutes", "totalMarks"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "subject": { "type": "string", "minLength": 1 },
+        "examType": {
+          "type": "string",
+          "enum": ["Quiz", "Midterm", "Final", "Mock Test", "Practice", "Other"]
+        },
+        "durationMinutes": { "type": "integer", "minimum": 1 },
+        "totalMarks": { "type": "integer", "minimum": 1 },
+        "instructions": { "type": "string" },
+        "difficultyNote": {
+          "type": "string",
+          "description": "Short note on how difficulty was calibrated from the sample paper."
+        }
+      },
+      "additionalProperties": true
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": ["easy", "moderate", "hard", "mixed"],
+      "description": "Overall difficulty rating derived from the sample questions of the source paper."
+    },
+    "source": {
+      "type": "object",
+      "description": "Optional provenance: where the questions came from.",
+      "properties": {
+        "book": { "type": "string" },
+        "chapter": { "type": "string" },
+        "paperYear": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "questions": {
+      "type": "array",
+      "description": "The multiple-choice questions. Order is the order they appear in the exam.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "question", "options", "answerIndex"],
+        "properties": {
+          "id": { "type": "integer", "minimum": 1 },
+          "question": { "type": "string", "minLength": 1 },
+          "options": {
+            "type": "array",
+            "description": "Answer options. Usually 4; at least 2.",
+            "minItems": 2,
+            "items": { "type": "string" },
+            "uniqueItems": true
+          },
+          "answerIndex": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "0-based index of the correct option within options."
+          },
+          "explanation": { "type": "string" },
+          "topic": { "type": "string" },
+          "marks": { "type": "integer", "minimum": 0 }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

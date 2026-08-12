@@ -1,0 +1,131 @@
+{
+  "exam": {
+    "title": "Cell Biology — Unit Test",
+    "subject": "Biology",
+    "examType": "Mock Test",
+    "durationMinutes": 15,
+    "totalMarks": 8,
+    "instructions": "Each question carries 1 mark. Choose the single best option. No negative marking.",
+    "difficultyNote": "Calibrated from 3 sample questions of the 2025 paper: recall-based with a few application items."
+  },
+  "difficulty": "moderate",
+  "source": {
+    "book": "NCERT Biology — Class XI",
+    "chapter": "Cell: The Unit of Life",
+    "paperYear": "2025"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "question": "Which of the following is the main site of ATP synthesis in a eukaryotic cell?",
+      "options": [
+        "Rough endoplasmic reticulum",
+        "Mitochondria",
+        "Golgi apparatus",
+        "Lysosome"
+      ],
+      "answerIndex": 1,
+      "explanation": "Mitochondria are the powerhouse of the cell; oxidative phosphorylation and most ATP generation occur on their inner membrane.",
+      "topic": "Cell organelles",
+      "marks": 1
+    },
+    {
+      "id": 2,
+      "question": "Ribosomes are composed of which of the following?",
+      "options": [
+        "RNA and proteins",
+        "DNA and proteins",
+        "Lipids and RNA",
+        "Only proteins"
+      ],
+      "answerIndex": 0,
+      "explanation": "Ribosomes are nucleoprotein complexes made of ribosomal RNA (rRNA) and proteins, assembled in the nucleolus.",
+      "topic": "Cell organelles",
+      "marks": 1
+    },
+    {
+      "id": 3,
+      "question": "Which organelle is responsible for the intracellular digestion of worn-out organelles and foreign material?",
+      "options": [
+        "Peroxisome",
+        "Lysosome",
+        "Vacuole",
+        "Centrosome"
+      ],
+      "answerIndex": 1,
+      "explanation": "Lysosomes contain hydrolytic enzymes (acid hydrolases) that digest macromolecules, worn-out organelles, and engulfed pathogens.",
+      "topic": "Cell organelles",
+      "marks": 1
+    },
+    {
+      "id": 4,
+      "question": "The semifluid matrix filling the space between the nuclear envelope and the cell membrane is called the:",
+      "options": [
+        "Nucleoplasm",
+        "Cytosol",
+        "Cytoplasm",
+        "Protoplasm"
+      ],
+      "answerIndex": 2,
+      "explanation": "Cytoplasm is the semifluid matrix between the nuclear envelope and plasma membrane; cytosol is its soluble part excluding organelles.",
+      "topic": "Cell structure",
+      "marks": 1
+    },
+    {
+      "id": 5,
+      "question": "Which of the following cell organelles is bounded by a single membrane?",
+      "options": [
+        "Mitochondria",
+        "Plastids",
+        "Lysosomes",
+        "Nucleus"
+      ],
+      "answerIndex": 2,
+      "explanation": "Lysosomes are single-membrane-bound organelles; mitochondria, plastids, and the nucleus have double membranes.",
+      "topic": "Cell organelles",
+      "marks": 1
+    },
+    {
+      "id": 6,
+      "question": "Which of the following statements about the cell wall is correct?",
+      "options": [
+        "It is present in animal cells and made of cholesterol",
+        "It is found in plant cells and provides structural support",
+        "It regulates the movement of all molecules in and out of the cell",
+        "It is a selectively permeable membrane made of phospholipids"
+      ],
+      "answerIndex": 1,
+      "explanation": "Plant cell walls are made chiefly of cellulose, provide rigidity and support, and are freely permeable — unlike the plasma membrane.",
+      "topic": "Cell structure",
+      "marks": 1
+    },
+    {
+      "id": 7,
+      "question": "A student observes a cell with a prominent nucleus, a large central vacuole, and a cell wall. The cell is most likely a:",
+      "options": [
+        "Red blood cell",
+        "Neuron",
+        "Plant cell",
+        "Bacterial cell"
+      ],
+      "answerIndex": 2,
+      "explanation": "A cell wall and large central vacuole are characteristic of mature plant cells; RBCs, neurons, and bacteria lack both together.",
+      "topic": "Cell structure",
+      "marks": 1
+    },
+    {
+      "id": 8,
+      "question": "The structural organisation of the nucleus includes the nuclear envelope, nucleoplasm, nucleolus, and:",
+      "options": [
+        "Chromatin",
+        "Plasmodesmata",
+        "Peroxisomes",
+        "Microtubules"
+      ],
+      "answerIndex": 0,
+      "explanation": "The nucleus comprises the nuclear envelope, nucleoplasm, nucleolus, and chromatin (DNA + histone proteins).",
+      "topic": "Nucleus",
+      "marks": 1
+    }
+  ]
+}
