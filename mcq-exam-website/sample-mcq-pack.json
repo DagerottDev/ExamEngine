@@ -4,8 +4,8 @@
     "subject": "Biology",
     "examType": "Mock Test",
     "durationMinutes": 15,
-    "totalMarks": 8,
-    "instructions": "Each question carries 1 mark. Choose the single best option. No negative marking.",
+    "totalMarks": 9,
+    "instructions": "Each question carries 1 mark. Some questions have multiple correct answers — select all that apply.",
     "difficultyNote": "Calibrated from 3 sample questions of the 2025 paper: recall-based with a few application items."
   },
   "difficulty": "moderate",
@@ -125,6 +125,21 @@
       "answerIndex": 0,
       "explanation": "The nucleus comprises the nuclear envelope, nucleoplasm, nucleolus, and chromatin (DNA + histone proteins).",
       "topic": "Nucleus",
+      "marks": 1
+    },
+    {
+      "id": 9,
+      "question": "Which of the following are part of the endomembrane system?",
+      "options": [
+        "Endoplasmic reticulum",
+        "Golgi apparatus",
+        "Mitochondria",
+        "Lysosomes"
+      ],
+      "multiSelect": true,
+      "answerIndices": [0, 1, 3],
+      "explanation": "The endomembrane system includes the ER, Golgi apparatus, lysosomes, and vacuoles; mitochondria are excluded because they have their own double membrane.",
+      "topic": "Cell organelles",
       "marks": 1
     }
   ]

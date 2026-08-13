@@ -3,28 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MCQ Exam Viewer</title>
+<title>MCQ Exam Viewer — Prometric-Style Session</title>
 <style>
 /* ============================================================
-   MCQ Exam Viewer — classic exam-paper styling
-   Fonts: serif for exam content (Georgia/Times), sans for chrome
-   Colors: warm paper, deep ink, exam blue accent, red margin
+   MCQ Exam Viewer — Prometric-style exam session
+   Dark navy header + white sheet + bottom toolbar, with a
+   per-question countdown that stays fixed at the top right.
    ============================================================ */
 
 :root {
-  --paper: #f6f3ea;          /* page background */
-  --sheet: #fffdf7;          /* exam sheet */
-  --ink: #23202a;            /* body text */
-  --ink-soft: #5b5764;       /* secondary text */
-  --line: #ddd6c4;           /* hairlines */
-  --accent: #1a3a6b;         /* deep exam blue */
-  --accent-dark: #122a50;
-  --accent-soft: #e8eef8;
-  --red: #b3261e;            /* exam margin / errors */
-  --green: #1c7c3c;
-  --amber: #b45309;
-  --serif: Georgia, "Times New Roman", Cambria, "Palatino Linotype", serif;
+  --paper: #eef1f5;          /* page background */
+  --sheet: #ffffff;          /* exam sheet / cards */
+  --surface: #f2f4f7;        /* toolbar / palette */
+  --surface-2: #f8fafc;      /* wells, option rows */
+  --field: #ffffff;          /* input background */
+  --ink: #1c2430;            /* body text */
+  --ink-soft: #5b6574;       /* secondary text */
+  --line: #d8dde4;           /* hairlines */
+  --accent: #0e4d92;         /* Prometric navy blue */
+  --accent-dark: #0a3a6d;
+  --accent-soft: #e4edf8;
+  --track: #e3e8ef;          /* score circle track */
+  --well: #2b2a33;           /* code block background */
+  --red: #c0392b;
+  --green: #1e8449;
+  --amber: #c07a08;
+  --amber-soft: #fdf3e0;
+  --danger-bg: #fdeceb;
+  --danger-border: #f3b8b3;
+  --danger-ink: #8c1d16;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --shadow: 0 14px 40px rgba(15, 35, 65, 0.14);
+}
+
+[data-theme="dark"] {
+  --paper: #12161c;
+  --sheet: #1c222b;
+  --surface: #232a34;
+  --surface-2: #1a2028;
+  --field: #12161c;
+  --ink: #e7ebf1;
+  --ink-soft: #9aa6b4;
+  --line: #343e4b;
+  --accent: #3b82d6;
+  --accent-dark: #0a3a6d;
+  --accent-soft: #1d2f47;
+  --track: #2b333e;
+  --well: #0e1217;
+  --red: #e07063;
+  --green: #67c389;
+  --amber: #e0a34e;
+  --amber-soft: #382d16;
+  --danger-bg: #331b1a;
+  --danger-border: #7c3a34;
+  --danger-ink: #f0a29b;
+  --shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,9 +69,7 @@
 
 body {
   font-family: var(--sans);
-  background:
-    radial-gradient(circle at 15% 10%, rgba(26, 58, 107, 0.06), transparent 45%),
-    var(--paper);
+  background: var(--paper);
   color: var(--ink);
   min-height: 100vh;
   line-height: 1.5;
@@ -45,16 +77,85 @@ body {
 
 .view { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
 
+/* ---------------- Fixed countdown timer (top right) ---------------- */
+
+.exam-header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+.exam-timer {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  padding: 6px 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.timer-label {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.2px;
+  color: #c9d9ee;
+}
+.timer-clock {
+  font-family: var(--mono);
+  font-size: 22px; font-weight: 700;
+  color: #fff;
+  min-width: 54px; text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.timer-clock.low { color: #ffd7d3; animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: 0.55; } }
+
+/* ---------------- Toast ---------------- */
+
+.toast {
+  position: fixed;
+  bottom: 26px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent-dark);
+  color: #fff;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  z-index: 400;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+/* ---------------- Theme toggle ---------------- */
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: 12.5px; font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
 /* ---------------- Landing ---------------- */
 
 .landing-card {
+  position: relative;
   width: min(680px, 100%);
   background: var(--sheet);
   border: 1px solid var(--line);
   border-radius: 14px;
-  box-shadow: 0 18px 50px rgba(60, 45, 20, 0.12);
+  box-shadow: var(--shadow);
   padding: 40px 40px 32px;
   text-align: center;
+}
+.landing-card .theme-toggle {
+  position: absolute;
+  top: 14px; right: 14px;
+  color: var(--ink-soft);
+  border-color: var(--line);
 }
 
 .landing-emblem {
@@ -62,7 +163,6 @@ body {
   border-radius: 50%;
   background: var(--accent);
   color: #fff;
-  font-family: var(--serif);
   font-size: 26px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   letter-spacing: 1px;
@@ -70,20 +170,18 @@ body {
 }
 
 .landing-card h1 {
-  font-family: var(--serif);
-  font-size: 30px;
-  color: var(--accent-dark);
-  letter-spacing: 0.3px;
+  font-size: 28px;
+  color: var(--ink);
+  letter-spacing: 0.2px;
 }
-
-.landing-tag { color: var(--ink-soft); margin-top: 6px; font-size: 15px; }
+.landing-tag { color: var(--ink-soft); margin-top: 6px; font-size: 14.5px; }
 
 .drop-zone {
   margin: 26px auto 0;
-  padding: 34px 20px;
-  border: 2px dashed #b9b09a;
+  padding: 30px 20px;
+  border: 2px dashed var(--line);
   border-radius: 12px;
-  background: #fbf8f0;
+  background: var(--surface-2);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, transform 0.1s;
   outline: none;
@@ -95,21 +193,61 @@ body {
 .drop-zone.dragover { transform: scale(1.01); }
 
 .drop-icon { font-size: 34px; color: var(--accent); line-height: 1; }
-.drop-title { margin-top: 10px; font-size: 17px; }
+.drop-title { margin-top: 10px; font-size: 16.5px; }
 .drop-title code {
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  background: #efe9da; padding: 2px 6px; border-radius: 5px; font-size: 14px;
+  font-family: var(--mono);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 2px 6px; border-radius: 5px; font-size: 14px;
 }
-.drop-sub { margin-top: 6px; font-size: 13.5px; color: var(--ink-soft); }
+.drop-sub { margin-top: 6px; font-size: 13px; color: var(--ink-soft); }
 .link-like { color: var(--accent); font-weight: 600; text-decoration: underline; }
+
+/* timer configuration (asked once) */
+.timer-config {
+  margin-top: 22px;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.timer-config-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 8px; flex-wrap: wrap;
+}
+.timer-config-title { font-size: 14px; font-weight: 700; color: var(--accent); }
+.timer-config-note { font-size: 12px; color: var(--ink-soft); }
+.timer-config-row { margin-top: 12px; display: flex; align-items: flex-end; gap: 10px; }
+.timer-field { display: flex; flex-direction: column; gap: 4px; }
+.timer-field span {
+  font-size: 11px; font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.timer-field input {
+  width: 76px;
+  padding: 8px 10px;
+  font-size: 16px; font-weight: 700; text-align: center;
+  border: 1px solid var(--line); border-radius: 8px;
+  background: var(--field); color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.timer-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.timer-colon { font-size: 20px; font-weight: 800; color: var(--ink-soft); padding-bottom: 6px; }
+.timer-config-hint { margin-top: 10px; font-size: 12px; color: var(--ink-soft); }
 
 .landing-actions { margin-top: 20px; }
 
 .upload-error {
   margin-top: 18px;
-  background: #fdeceb;
-  border: 1px solid #f3b8b3;
-  color: #8c1d16;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-ink);
   border-radius: 10px;
   padding: 14px 16px;
   font-size: 13.5px;
@@ -123,10 +261,10 @@ body {
 .format-note summary { cursor: pointer; color: var(--accent); font-size: 13.5px; font-weight: 600; }
 .format-note pre {
   margin-top: 10px; padding: 14px;
-  background: #2b2a33; color: #e8e6df;
+  background: var(--well); color: #e8e6df;
   border-radius: 10px; font-size: 12px; line-height: 1.55;
   overflow-x: auto;
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-family: var(--mono);
 }
 
 /* ---------------- Buttons ---------------- */
@@ -153,53 +291,52 @@ body {
 
 /* ---------------- Exam window ---------------- */
 
+#exam-view { padding: 0; }
+#exam-view .exam-shell {
+  width: 100%;
+  height: 100vh;
+  max-width: none;
+  min-height: 0;
+  margin-top: 0;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+}
 .exam-shell {
   width: min(1060px, 100%);
   display: flex; flex-direction: column;
-  min-height: calc(100vh - 48px);
   background: var(--sheet);
   border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 20px 55px rgba(60, 45, 20, 0.16);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
   overflow: hidden;
 }
 
 .exam-header {
   display: flex; justify-content: space-between; align-items: center;
-  gap: 16px; flex-wrap: wrap;
-  padding: 18px 26px;
-  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+  gap: 14px; flex-wrap: wrap;
+  padding: 14px 24px;
+  background: linear-gradient(180deg, #1759a8 0%, #0b3d79 100%);
   color: #fff;
 }
-.exam-header h2 { font-family: var(--serif); font-size: 21px; letter-spacing: 0.3px; }
-.exam-meta { margin-top: 5px; font-size: 13px; color: #cbd7ec; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.exam-header h2 { font-size: 20px; font-weight: 700; letter-spacing: 0.2px; }
+.exam-meta { margin-top: 4px; font-size: 12.5px; color: #c9d9ee; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .type-badge {
   background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.45);
   padding: 1px 9px; border-radius: 20px;
-  font-size: 11.5px; letter-spacing: 0.4px; text-transform: uppercase;
+  font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;
 }
 
-.exam-header-right { text-align: right; }
-.exam-timer {
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 26px; font-weight: 700;
-  background: rgba(0, 0, 0, 0.25);
-  padding: 3px 14px; border-radius: 8px;
-  display: inline-block;
-  min-width: 96px;
-}
-.exam-timer.low { color: #ffd7d3; animation: pulse 1s infinite; }
-@keyframes pulse { 50% { opacity: 0.55; } }
-.exam-progress { margin-top: 6px; font-size: 12.5px; color: #cbd7ec; }
+.exam-header .theme-toggle { color: #fff; border-color: rgba(255, 255, 255, 0.55); }
+.exam-header .theme-toggle:hover { background: rgba(255, 255, 255, 0.14); color: #fff; border-color: #fff; }
 
 .exam-instructions {
-  padding: 12px 26px;
-  background: #f2ecd9;
+  padding: 10px 26px;
+  background: var(--surface-2);
   border-bottom: 1px solid var(--line);
-  font-family: var(--serif);
-  font-size: 14px; font-style: italic;
-  color: #4a4432;
+  font-size: 13.5px; font-style: italic;
+  color: var(--ink-soft);
 }
 .exam-instructions:not([hidden]) { display: block; }
 
@@ -211,7 +348,7 @@ body {
   flex-shrink: 0;
   padding: 20px 18px;
   border-right: 1px solid var(--line);
-  background: #faf7ef;
+  background: var(--surface);
   overflow-y: auto;
 }
 .exam-palette h3 {
@@ -221,11 +358,10 @@ body {
 .palette-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .palette-btn {
   aspect-ratio: 1;
-  border: 1.5px solid #c9c2ae;
+  border: 1.5px solid var(--line);
   background: var(--sheet);
   color: var(--ink);
   border-radius: 8px;
-  font-family: var(--serif);
   font-size: 14px; font-weight: 700;
   cursor: pointer;
   transition: all 0.1s;
@@ -233,11 +369,11 @@ body {
 .palette-btn:hover { border-color: var(--accent); }
 .palette-btn.current {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(26, 58, 107, 0.25);
+  box-shadow: 0 0 0 2px rgba(14, 77, 146, 0.25);
   background: var(--accent-soft);
 }
 .palette-btn.answered { background: var(--accent); border-color: var(--accent); color: #fff; }
-.palette-btn.answered.current { box-shadow: 0 0 0 2px rgba(26, 58, 107, 0.35); }
+.palette-btn.answered.current { box-shadow: 0 0 0 2px rgba(14, 77, 146, 0.35); }
 .palette-btn.flagged { position: relative; }
 .palette-btn.flagged::after {
   content: "";
@@ -260,123 +396,139 @@ body {
 /* question sheet */
 .question-sheet {
   flex: 1;
-  padding: 30px 38px 24px;
-  position: relative;
+  padding: 26px 34px 30px;
   overflow-y: auto;
   min-width: 0;
-}
-/* classic red margin line down the left of the paper */
-.question-sheet::before {
-  content: "";
-  position: absolute;
-  top: 18px; bottom: 18px; left: 22px;
-  width: 2.5px;
-  background: var(--red);
-  border-radius: 2px;
-  opacity: 0.55;
 }
 
 .question-topline {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 14px;
-  padding-left: 26px;
+  margin-bottom: 16px;
 }
 .question-number {
-  font-family: var(--serif);
-  font-size: 20px; font-weight: 700;
-  color: var(--accent-dark);
+  font-size: 16px; font-weight: 800;
+  color: var(--accent);
 }
-.flag-btn {
-  background: transparent; border: 1px solid #cfc6ae;
-  color: var(--ink-soft);
-  font-size: 12.5px; padding: 6px 12px; border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.12s;
+.q-marks {
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 2px 10px; border-radius: 20px;
+  font-size: 12.5px; font-weight: 700;
 }
-.flag-btn:hover { border-color: var(--amber); color: var(--amber); }
-.flag-btn.flagged { background: #fdf3e0; border-color: var(--amber); color: var(--amber); font-weight: 600; }
 
 .question-text {
-  font-family: var(--serif);
-  font-size: 18.5px;
-  line-height: 1.65;
-  padding-left: 26px;
-  margin-bottom: 22px;
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 20px;
 }
 
-.options-list { display: flex; flex-direction: column; gap: 12px; padding-left: 26px; }
+.options-list { display: flex; flex-direction: column; gap: 12px; }
+.multi-hint {
+  font-size: 13px; font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  display: inline-block;
+  padding: 3px 12px; border-radius: 20px;
+  margin-bottom: 2px; align-self: flex-start;
+}
+.format-note p { margin-top: 10px; font-size: 12.5px; color: var(--ink-soft); }
+.format-note code {
+  font-family: var(--mono);
+  background: var(--surface);
+  padding: 1px 5px; border-radius: 4px;
+  font-size: 11.5px;
+}
 
 .option-row {
-  display: flex; align-items: flex-start; gap: 14px;
-  border: 1.5px solid #d8d0ba;
-  border-radius: 10px;
-  padding: 13px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
   cursor: pointer;
-  background: #fffef9;
+  background: var(--surface-2);
+  font-size: 16px;
   transition: border-color 0.1s, background 0.1s, box-shadow 0.1s;
-  font-family: var(--serif);
-  font-size: 16.5px;
+  text-align: left;
+  color: var(--ink);
 }
 .option-row:hover { border-color: var(--accent); background: var(--accent-soft); }
 .option-row.selected {
   border-color: var(--accent);
   background: var(--accent-soft);
-  box-shadow: 0 0 0 2px rgba(26, 58, 107, 0.18);
+  box-shadow: 0 0 0 2px rgba(14, 77, 146, 0.18);
 }
 .option-badge {
   flex-shrink: 0;
-  width: 30px; height: 30px;
-  border: 1.5px solid #bfb79f;
-  border-radius: 7px;
+  width: 26px; height: 26px;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px;
+  font-weight: 700; font-size: 13px;
   color: var(--ink-soft);
-  background: #fff;
-  font-family: var(--serif);
+  background: var(--sheet);
 }
 .option-row.selected .option-badge { background: var(--accent); border-color: var(--accent); color: #fff; }
-.option-text { flex: 1; padding-top: 3px; }
+.option-text { flex: 1; padding-top: 2px; }
 
-.question-nav {
+/* bottom toolbar */
+.exam-toolbar {
   display: flex; align-items: center; justify-content: space-between;
-  margin-top: 30px;
-  padding-top: 18px;
+  gap: 10px; flex-wrap: wrap;
+  padding: 12px 20px;
   border-top: 1px solid var(--line);
-  padding-left: 26px;
+  background: var(--surface);
 }
-
-/* footer */
-.exam-footer {
-  padding: 14px 26px;
-  border-top: 1px solid var(--line);
-  background: #faf7ef;
-  display: flex; justify-content: flex-end;
+.toolbar-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.toolbar-btn {
+  font-family: var(--sans);
+  font-size: 13.5px; font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--sheet);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.toolbar-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.toolbar-btn:disabled { opacity: 0.45; cursor: default; }
+.toolbar-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.toolbar-btn.primary:hover:not(:disabled) { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+.toolbar-btn.flagged {
+  background: var(--amber-soft);
+  border-color: var(--amber);
+  color: var(--amber);
 }
 
 /* ---------------- Result ---------------- */
 
 .result-card {
+  position: relative;
   width: min(760px, 100%);
   background: var(--sheet);
   border: 1px solid var(--line);
   border-radius: 14px;
-  box-shadow: 0 18px 50px rgba(60, 45, 20, 0.12);
+  box-shadow: var(--shadow);
   padding: 34px 40px;
 }
+.result-card .theme-toggle {
+  position: absolute;
+  top: 14px; right: 14px;
+  color: var(--ink-soft);
+  border-color: var(--line);
+}
 .result-card h2 {
-  font-family: var(--serif);
-  font-size: 24px; color: var(--accent-dark);
+  font-size: 24px; color: var(--ink);
   margin-bottom: 22px; text-align: center;
 }
 .result-score-row { display: flex; align-items: center; justify-content: center; gap: 26px; }
 .score-circle {
   width: 128px; height: 128px;
   border-radius: 50%;
-  background: conic-gradient(var(--accent) var(--pct, 0%), #e6e0cf 0);
+  background: conic-gradient(var(--accent) var(--pct, 0%), var(--track) 0);
   display: flex; align-items: center; justify-content: center;
-  font-size: 26px; font-weight: 800; color: var(--accent-dark);
+  font-size: 26px; font-weight: 800; color: var(--accent);
   position: relative;
-  font-family: var(--serif);
 }
 .score-circle::before { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: var(--sheet); }
 .score-circle span { position: relative; }
@@ -385,7 +537,7 @@ body {
 
 .score-stats { display: flex; justify-content: center; gap: 30px; margin: 26px 0; }
 .stat { font-size: 13px; color: var(--ink-soft); text-align: center; }
-.stat b { display: block; font-size: 22px; font-family: var(--serif); }
+.stat b { display: block; font-size: 22px; }
 .stat-correct b { color: var(--green); }
 .stat-wrong b { color: var(--red); }
 .stat-skipped b { color: var(--ink-soft); }
@@ -400,28 +552,36 @@ body {
   border-radius: 10px;
   padding: 16px 18px;
   margin-bottom: 14px;
-  background: #fffef9;
+  background: var(--surface-2);
 }
 .review-item.correct { border-left-color: var(--green); }
 .review-item.wrong { border-left-color: var(--red); }
 .review-item.skipped { border-left-color: var(--amber); }
-.review-q { font-family: var(--serif); font-size: 16.5px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
+.review-q { font-size: 16.5px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
+.marks-chip {
+  margin-left: 8px; padding: 1px 8px; border-radius: 12px;
+  font-size: 11.5px; font-weight: 800;
+  background: var(--surface);
+  vertical-align: middle; white-space: nowrap;
+}
+.marks-chip.positive { color: var(--green); }
+.marks-chip.negative { color: var(--red); }
+.marks-chip.zero { color: var(--ink-soft); }
 .review-answers { font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
 .review-answers .yours { color: var(--red); font-weight: 600; }
 .review-answers .yours.ok { color: var(--green); }
 .review-answers .correct-ans { color: var(--green); font-weight: 600; }
 .review-explanation {
   margin-top: 10px; padding-top: 10px;
-  border-top: 1px dashed #e0d9c6;
+  border-top: 1px dashed var(--line);
   font-size: 13.5px; color: var(--ink-soft);
-  font-family: var(--serif);
 }
 
 /* ---------------- Modal ---------------- */
 
 .modal-backdrop {
   position: fixed; inset: 0;
-  background: rgba(25, 22, 30, 0.55);
+  background: rgba(10, 20, 40, 0.55);
   display: flex; align-items: center; justify-content: center;
   z-index: 100;
   padding: 20px;
@@ -434,7 +594,7 @@ body {
   padding: 26px 28px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
 }
-.modal h3 { font-family: var(--serif); font-size: 20px; color: var(--accent-dark); }
+.modal h3 { font-size: 20px; color: var(--ink); }
 .modal p { margin-top: 10px; font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
 
@@ -445,22 +605,29 @@ body {
   .exam-palette { width: 100%; border-right: none; border-bottom: 1px solid var(--line); padding: 14px 20px; }
   .palette-grid { grid-template-columns: repeat(8, 1fr); }
   .question-sheet { padding: 22px 18px; }
-  .question-sheet::before { left: 10px; }
-  .question-text, .options-list, .question-topline, .question-nav { padding-left: 14px; }
-  .landing-card { padding: 28px 20px; }
+  .exam-header { padding: 12px 16px; }
+  .exam-timer { padding: 4px 10px; gap: 6px; }
+  .timer-clock { font-size: 17px; min-width: 42px; }
+  .landing-card { padding: 30px 18px 24px; }
   .result-card { padding: 26px 20px; }
+  .exam-toolbar { justify-content: center; }
 }
 </style>
 </head>
 <body>
 
+<!-- Toast notifications -->
+<div id="toast" class="toast" role="status"></div>
+
 <!-- ============ LANDING / UPLOAD VIEW ============ -->
 <section id="landing-view" class="view">
   <div class="landing-card">
+    <button type="button" class="theme-toggle" data-theme-toggle>🌙 Dark</button>
+
     <div class="landing-brand">
       <div class="landing-emblem">MCQ</div>
       <h1>Exam Paper Viewer</h1>
-      <p class="landing-tag">Upload an MCQ JSON pack and take the exam in a real paper-style window.</p>
+      <p class="landing-tag">Upload an MCQ JSON pack and take the exam in a Prometric-style session — per-question countdown, question palette, and full review.</p>
     </div>
 
     <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Upload JSON pack">
@@ -468,6 +635,43 @@ body {
       <div class="drop-icon" aria-hidden="true">⇪</div>
       <p class="drop-title">Drop your <code>.json</code> pack here</p>
       <p class="drop-sub">or <span class="link-like">browse files</span> — any pack generated by the <em>mcq-pack-generator</em> skill</p>
+    </div>
+
+    <div class="timer-config">
+      <div class="timer-config-head">
+        <span class="timer-config-title">⏱ Question Timer</span>
+        <span class="timer-config-note">Set once — every question gets this countdown</span>
+      </div>
+      <div class="timer-config-row">
+        <label class="timer-field">
+          <span>Minutes</span>
+          <input type="number" id="timer-min" min="0" max="120" step="1" value="1" inputmode="numeric">
+        </label>
+        <span class="timer-colon">:</span>
+        <label class="timer-field">
+          <span>Seconds</span>
+          <input type="number" id="timer-sec" min="0" max="59" step="1" value="0" inputmode="numeric">
+        </label>
+      </div>
+      <p class="timer-config-hint">When a question's time runs out, the exam auto-advances to the next one (and auto-submits on the last).</p>
+    </div>
+
+    <div class="timer-config">
+      <div class="timer-config-head">
+        <span class="timer-config-title">🏷 Marking Scheme</span>
+        <span class="timer-config-note">Set once — controls scoring</span>
+      </div>
+      <div class="timer-config-row">
+        <label class="timer-field">
+          <span>Correct answer (+)</span>
+          <input type="number" id="mark-correct" min="0" max="100" step="0.25" value="1" inputmode="decimal">
+        </label>
+        <label class="timer-field">
+          <span>Wrong answer (−)</span>
+          <input type="number" id="mark-negative" min="0" max="100" step="0.25" value="0" inputmode="decimal">
+        </label>
+      </div>
+      <p class="timer-config-hint">Correct answers earn the positive marks; wrong answers lose the negative marks. Unanswered questions score 0. Applies to every question.</p>
     </div>
 
     <div class="landing-actions">
@@ -488,6 +692,8 @@ body {
       "answerIndex": 2, "explanation": "...", "topic": "...", "marks": 1 }
   ]
 }</pre>
+      <p class="format-note-hint">Multi-select questions: use <code>"multiSelect": true</code> and
+      <code>"answerIndices": [0, 2]</code> instead of <code>"answerIndex"</code>.</p>
     </details>
   </div>
 </section>
@@ -505,8 +711,11 @@ body {
         </p>
       </div>
       <div class="exam-header-right">
-        <div id="exam-timer" class="exam-timer" title="Time remaining">15:00</div>
-        <div class="exam-progress">Question <span id="q-current">1</span> of <span id="q-total">0</span></div>
+        <div class="exam-timer" title="Time remaining for this question">
+          <span class="timer-label">Time Remaining</span>
+          <span id="exam-timer-clock" class="timer-clock">01:00</span>
+        </div>
+        <button type="button" class="theme-toggle" data-theme-toggle>🌙 Dark</button>
       </div>
     </header>
 
@@ -525,22 +734,23 @@ body {
 
       <section class="question-sheet">
         <div class="question-topline">
-          <span class="question-number" id="q-number">Q1</span>
-          <button id="flag-btn" class="flag-btn" type="button">⚑ Flag for review</button>
+          <span class="question-number" id="q-number">Question 1 of 1</span>
+          <span id="q-marks" class="q-marks"></span>
         </div>
         <p id="question-text" class="question-text"></p>
         <div id="options-list" class="options-list"></div>
-
-        <div class="question-nav">
-          <button id="prev-btn" class="btn btn-ghost" type="button">← Previous</button>
-          <div class="nav-spacer"></div>
-          <button id="next-btn" class="btn btn-ghost" type="button">Next →</button>
-        </div>
       </section>
     </main>
 
-    <footer class="exam-footer">
-      <button id="submit-btn" class="btn btn-primary" type="button">Submit Exam</button>
+    <footer class="exam-toolbar">
+      <div class="toolbar-group">
+        <button id="prev-btn" class="toolbar-btn" type="button">← Previous</button>
+        <button id="flag-btn" class="toolbar-btn" type="button">⚑ Mark for review</button>
+      </div>
+      <div class="toolbar-group">
+        <button id="next-btn" class="toolbar-btn" type="button">Next →</button>
+        <button id="submit-btn" class="toolbar-btn primary" type="button">Submit Exam</button>
+      </div>
     </footer>
   </div>
 </section>
@@ -548,6 +758,7 @@ body {
 <!-- ============ RESULT VIEW ============ -->
 <section id="result-view" class="view" hidden>
   <div class="result-card">
+    <button type="button" class="theme-toggle" data-theme-toggle>🌙 Dark</button>
     <h2 id="result-title">Result</h2>
     <div class="result-score-row">
       <div class="score-circle" id="score-circle">0%</div>
@@ -597,8 +808,8 @@ const SAMPLE_PACK = {
     subject: "Biology",
     examType: "Mock Test",
     durationMinutes: 15,
-    totalMarks: 8,
-    instructions: "Each question carries 1 mark. Choose the single best option. No negative marking.",
+    totalMarks: 9,
+    instructions: "Each question carries 1 mark. Some questions have multiple correct answers — select all that apply.",
     difficultyNote: "Calibrated from 3 sample questions of the 2025 paper: recall-based with a few application items."
   },
   difficulty: "moderate",
@@ -615,7 +826,8 @@ const SAMPLE_PACK = {
     { id: 5, question: "Which of the following cell organelles is bounded by a single membrane?", options: ["Mitochondria", "Plastids", "Lysosomes", "Nucleus"], answerIndex: 2, explanation: "Lysosomes are single-membrane-bound organelles; mitochondria, plastids, and the nucleus have double membranes.", topic: "Cell organelles", marks: 1 },
     { id: 6, question: "Which of the following statements about the cell wall is correct?", options: ["It is present in animal cells and made of cholesterol", "It is found in plant cells and provides structural support", "It regulates the movement of all molecules in and out of the cell", "It is a selectively permeable membrane made of phospholipids"], answerIndex: 1, explanation: "Plant cell walls are made chiefly of cellulose, provide rigidity and support, and are freely permeable — unlike the plasma membrane.", topic: "Cell structure", marks: 1 },
     { id: 7, question: "A student observes a cell with a prominent nucleus, a large central vacuole, and a cell wall. The cell is most likely a:", options: ["Red blood cell", "Neuron", "Plant cell", "Bacterial cell"], answerIndex: 2, explanation: "A cell wall and large central vacuole are characteristic of mature plant cells; RBCs, neurons, and bacteria lack both together.", topic: "Cell structure", marks: 1 },
-    { id: 8, question: "The structural organisation of the nucleus includes the nuclear envelope, nucleoplasm, nucleolus, and:", options: ["Chromatin", "Plasmodesmata", "Peroxisomes", "Microtubules"], answerIndex: 0, explanation: "The nucleus comprises the nuclear envelope, nucleoplasm, nucleolus, and chromatin (DNA + histone proteins).", topic: "Nucleus", marks: 1 }
+    { id: 8, question: "The structural organisation of the nucleus includes the nuclear envelope, nucleoplasm, nucleolus, and:", options: ["Chromatin", "Plasmodesmata", "Peroxisomes", "Microtubules"], answerIndex: 0, explanation: "The nucleus comprises the nuclear envelope, nucleoplasm, nucleolus, and chromatin (DNA + histone proteins).", topic: "Nucleus", marks: 1 },
+    { id: 9, question: "Which of the following are part of the endomembrane system?", options: ["Endoplasmic reticulum", "Golgi apparatus", "Mitochondria", "Lysosomes"], multiSelect: true, answerIndices: [0, 1, 3], explanation: "The endomembrane system includes the ER, Golgi apparatus, lysosomes, and vacuoles; mitochondria are excluded because they have their own double membrane.", topic: "Cell organelles", marks: 1 }
   ]
 };
 
@@ -626,7 +838,9 @@ const state = {
   answers: new Map(),     // question id -> chosen option index
   flagged: new Set(),     // question ids flagged for review
   timerId: null,
-  timeLeft: 0,            // seconds
+  perQuestion: 60,        // seconds allowed per question (user-configured)
+  timeLeft: 0,            // seconds remaining on the current question
+  marking: { correct: 1, negative: 0 },  // user-configured marking scheme
   submitted: false,
   results: [],
 };
@@ -638,6 +852,69 @@ const views = {
   exam: $("exam-view"),
   result: $("result-view"),
 };
+
+/* ---------------- Theme (dark mode) ---------------- */
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  try { localStorage.setItem("mcq-theme", theme); } catch (e) { /* ignore */ }
+  document.querySelectorAll("[data-theme-toggle]").forEach((btn) => {
+    btn.textContent = theme === "dark" ? "☀️ Light" : "🌙 Dark";
+  });
+}
+
+function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem("mcq-theme"); } catch (e) { /* ignore */ }
+  applyTheme(saved === "dark" ? "dark" : "light");
+}
+
+/* ---------------- Timer configuration ---------------- */
+function readTimerConfig() {
+  const m = Math.max(0, parseInt($("timer-min").value, 10) || 0);
+  const s = Math.max(0, parseInt($("timer-sec").value, 10) || 0);
+  return m * 60 + s;
+}
+
+function saveTimerConfig(secs) {
+  try { localStorage.setItem("mcq-timer", String(secs)); } catch (e) { /* ignore */ }
+}
+
+function initTimerConfig() {
+  let secs = 60;
+  try {
+    const v = parseInt(localStorage.getItem("mcq-timer"), 10);
+    if (Number.isFinite(v) && v > 0) secs = v;
+  } catch (e) { /* ignore */ }
+  $("timer-min").value = String(Math.floor(secs / 60));
+  $("timer-sec").value = String(secs % 60);
+}
+
+/* ---------------- Marking configuration ---------------- */
+function readMarkingConfig() {
+  const c = parseFloat($("mark-correct").value);
+  const n = parseFloat($("mark-negative").value);
+  return {
+    correct: Number.isFinite(c) && c >= 0 ? c : 1,
+    negative: Number.isFinite(n) && n >= 0 ? n : 0,
+  };
+}
+
+function saveMarkingConfig(m) {
+  try { localStorage.setItem("mcq-marking", JSON.stringify(m)); } catch (e) { /* ignore */ }
+}
+
+function initMarkingConfig() {
+  let m = { correct: 1, negative: 0 };
+  try {
+    const saved = JSON.parse(localStorage.getItem("mcq-marking"));
+    if (saved && typeof saved === "object") {
+      m.correct = Number.isFinite(saved.correct) && saved.correct >= 0 ? saved.correct : 1;
+      m.negative = Number.isFinite(saved.negative) && saved.negative >= 0 ? saved.negative : 0;
+    }
+  } catch (e) { /* ignore */ }
+  $("mark-correct").value = String(m.correct);
+  $("mark-negative").value = String(m.negative);
+}
 
 /* ---------------- Validation (mirrors scripts/validate_pack.py) ---------------- */
 const EXAM_TYPES = ["Quiz", "Midterm", "Final", "Mock Test", "Practice", "Other"];
@@ -684,7 +961,7 @@ function validatePack(data) {
         problems.push(`${where} must be an object.`);
         return;
       }
-      ["id", "question", "options", "answerIndex"].forEach((f) => {
+      ["id", "question", "options"].forEach((f) => {
         if (!(f in q)) problems.push(`${where} is missing required field: '${f}'.`);
       });
       if (!Number.isInteger(q.id)) problems.push(`${where}.id must be an integer.`);
@@ -706,10 +983,36 @@ function validatePack(data) {
         if (new Set(lowered).size !== lowered.length) problems.push(`${where}.options contains duplicates.`);
       }
 
-      if (!Number.isInteger(q.answerIndex)) {
-        problems.push(`${where}.answerIndex must be an integer.`);
-      } else if (Array.isArray(opts) && !(q.answerIndex >= 0 && q.answerIndex < opts.length)) {
-        problems.push(`${where}.answerIndex ${q.answerIndex} is out of range for ${opts.length} options (0-based).`);
+      const hasSingle = "answerIndex" in q;
+      const hasMulti = "answerIndices" in q;
+      if (!hasSingle && !hasMulti) {
+        problems.push(`${where} is missing required field: 'answerIndex' (or 'answerIndices' for multi-select).`);
+      }
+      if (hasMulti) {
+        const idxs = q.answerIndices;
+        if (!Array.isArray(idxs) || idxs.length < 2) {
+          problems.push(`${where}.answerIndices must be an array with at least 2 entries.`);
+        } else {
+          idxs.forEach((v, j) => {
+            if (!Number.isInteger(v)) problems.push(`${where}.answerIndices[${j}] must be an integer.`);
+          });
+          if (new Set(idxs).size !== idxs.length) problems.push(`${where}.answerIndices contains duplicates.`);
+          if (Array.isArray(opts)) {
+            idxs.forEach((v) => {
+              if (Number.isInteger(v) && !(v >= 0 && v < opts.length)) {
+                problems.push(`${where}.answerIndices entry ${v} is out of range for ${opts.length} options (0-based).`);
+              }
+            });
+          }
+        }
+        if (q.multiSelect === false) problems.push(`${where}.multiSelect must be true when 'answerIndices' is used.`);
+      }
+      if (hasSingle && !hasMulti) {
+        if (!Number.isInteger(q.answerIndex)) {
+          problems.push(`${where}.answerIndex must be an integer.`);
+        } else if (Array.isArray(opts) && !(q.answerIndex >= 0 && q.answerIndex < opts.length)) {
+          problems.push(`${where}.answerIndex ${q.answerIndex} is out of range for ${opts.length} options (0-based).`);
+        }
       }
 
       if (q.marks != null && (!Number.isInteger(q.marks) || q.marks < 0)) {
@@ -728,6 +1031,16 @@ function showView(name) {
   window.scrollTo(0, 0);
 }
 
+/* ---------------- Toast ---------------- */
+let toastTimer = null;
+function showToast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
 /* ---------------- Exam setup ---------------- */
 function startExam(pack) {
   state.pack = pack;
@@ -737,12 +1050,26 @@ function startExam(pack) {
   state.submitted = false;
   if (state.timerId) clearInterval(state.timerId);
 
+  // Read the per-question timer the user set once on the landing page.
+  let perQ = readTimerConfig();
+  if (!Number.isFinite(perQ) || perQ < 1) perQ = 60;
+  $("timer-min").value = String(Math.floor(perQ / 60));
+  $("timer-sec").value = String(perQ % 60);
+  saveTimerConfig(perQ);
+  state.perQuestion = perQ;
+
+  // Read the marking scheme the user set once on the landing page.
+  const marking = readMarkingConfig();
+  $("mark-correct").value = String(marking.correct);
+  $("mark-negative").value = String(marking.negative);
+  saveMarkingConfig(marking);
+  state.marking = marking;
+
   const ex = pack.exam;
   $("exam-title").textContent = ex.title;
   $("exam-subject").textContent = ex.subject;
   $("exam-type-badge").textContent = ex.examType;
   $("exam-difficulty").textContent = pack.difficulty;
-  $("q-total").textContent = String(pack.questions.length);
 
   const inst = $("exam-instructions");
   const parts = [];
@@ -754,7 +1081,7 @@ function startExam(pack) {
   inst.textContent = parts.join("  ·  ");
   inst.hidden = parts.length === 0;
 
-  state.timeLeft = ex.durationMinutes * 60;
+  state.timeLeft = state.perQuestion;
   renderTimer();
   state.timerId = setInterval(tick, 1000);
 
@@ -767,43 +1094,88 @@ function tick() {
   if (state.submitted) return;
   state.timeLeft -= 1;
   renderTimer();
-  if (state.timeLeft <= 0) {
-    clearInterval(state.timerId);
+  if (state.timeLeft <= 0) onQuestionTimeUp();
+}
+
+function onQuestionTimeUp() {
+  const n = state.pack.questions.length;
+  if (state.current < n - 1) {
+    showToast(`Time for Question ${state.current + 1} is up — moving on`);
+    setCurrent(state.current + 1);
+  } else {
+    showToast("Time is up — submitting your exam");
     submitExam(true);
   }
 }
 
 function renderTimer() {
-  const el = $("exam-timer");
+  const el = $("exam-timer-clock");
   const t = Math.max(0, state.timeLeft);
   const mm = String(Math.floor(t / 60)).padStart(2, "0");
   const ss = String(t % 60).padStart(2, "0");
   el.textContent = `${mm}:${ss}`;
-  el.classList.toggle("low", t <= 60);
+  el.classList.toggle("low", t <= 10);
+}
+
+/* ---------------- Question navigation ---------------- */
+function setCurrent(i) {
+  const n = state.pack.questions.length;
+  state.current = Math.min(n - 1, Math.max(0, i));
+  // Every question gets its own fresh countdown.
+  state.timeLeft = state.perQuestion;
+  renderTimer();
+  renderQuestion();
+  renderPalette();
+}
+
+function go(delta) {
+  setCurrent(state.current + delta);
+}
+
+/* ---------------- Multi-select helpers ---------------- */
+/* A question is multi-select when it declares answerIndices. */
+function isMultiQuestion(q) {
+  return Array.isArray(q && q.answerIndices);
+}
+
+/* Whether the candidate has actually answered the question (an empty
+   multi-select selection does not count as answered). */
+function isAnswered(q) {
+  const c = state.answers.get(q.id);
+  return isMultiQuestion(q) ? Array.isArray(c) && c.length > 0 : c !== undefined;
 }
 
 /* ---------------- Question rendering ---------------- */
 function renderQuestion() {
   const q = state.pack.questions[state.current];
   const n = state.pack.questions.length;
-  $("q-current").textContent = String(state.current + 1);
-  $("q-number").textContent = `Q${q.id}`;
+  $("q-number").textContent = `Question ${state.current + 1} of ${n}`;
+  $("q-marks").textContent = q.marks ? `[${q.marks} mark${q.marks > 1 ? "s" : ""}]` : "";
 
   const flagBtn = $("flag-btn");
   const isFlagged = state.flagged.has(q.id);
   flagBtn.classList.toggle("flagged", isFlagged);
-  flagBtn.textContent = isFlagged ? "⚑ Flagged" : "⚑ Flag for review";
+  flagBtn.textContent = isFlagged ? "✓ Marked for review" : "⚑ Mark for review";
 
   $("question-text").textContent = q.question;
 
   const list = $("options-list");
   list.innerHTML = "";
+  const multi = isMultiQuestion(q);
   const letters = "ABCDEFGH";
+  if (multi) {
+    const hint = document.createElement("p");
+    hint.className = "multi-hint";
+    hint.textContent = "☑ Select all that apply";
+    list.appendChild(hint);
+  }
   q.options.forEach((opt, i) => {
     const row = document.createElement("button");
     row.type = "button";
-    row.className = "option-row" + (state.answers.get(q.id) === i ? " selected" : "");
-    row.setAttribute("aria-pressed", state.answers.get(q.id) === i ? "true" : "false");
+    const chosen = state.answers.get(q.id);
+    const isSelected = multi ? Array.isArray(chosen) && chosen.includes(i) : chosen === i;
+    row.className = "option-row" + (isSelected ? " selected" : "");
+    row.setAttribute("aria-pressed", isSelected ? "true" : "false");
 
     const badge = document.createElement("span");
     badge.className = "option-badge";
@@ -814,7 +1186,7 @@ function renderQuestion() {
     text.textContent = opt;
 
     row.append(badge, text);
-    row.addEventListener("click", () => selectOption(q.id, i));
+    row.addEventListener("click", () => selectOption(q, i));
     list.appendChild(row);
   });
 
@@ -822,9 +1194,20 @@ function renderQuestion() {
   $("next-btn").disabled = state.current === n - 1;
 }
 
-function selectOption(qid, idx) {
+function selectOption(q, idx) {
   if (state.submitted) return;
-  state.answers.set(qid, idx);
+  const qid = q.id;
+  if (isMultiQuestion(q)) {
+    // Multi-select: toggle this option in the chosen set.
+    const sel = Array.isArray(state.answers.get(qid)) ? state.answers.get(qid).slice() : [];
+    if (sel.includes(idx)) sel.splice(sel.indexOf(idx), 1);
+    else sel.push(idx);
+    sel.sort((a, b) => a - b);
+    state.answers.set(qid, sel);
+  } else {
+    // Single answer: replace the previous choice.
+    state.answers.set(qid, idx);
+  }
   renderQuestion();
   renderPalette();
 }
@@ -838,29 +1221,15 @@ function renderPalette() {
     btn.className = "palette-btn";
     btn.textContent = String(i + 1);
     btn.title = `Question ${i + 1} (Q${q.id})`;
-    if (state.answers.has(q.id)) btn.classList.add("answered");
+    if (isAnswered(q)) btn.classList.add("answered");
     if (state.flagged.has(q.id)) btn.classList.add("flagged");
     if (i === state.current) btn.classList.add("current");
-    btn.addEventListener("click", () => {
-      state.current = i;
-      renderQuestion();
-      renderPalette();
-    });
+    btn.addEventListener("click", () => setCurrent(i));
     grid.appendChild(btn);
   });
 }
 
-/* ---------------- Navigation / flagging ---------------- */
-function go(delta) {
-  const n = state.pack.questions.length;
-  const next = Math.min(n - 1, Math.max(0, state.current + delta));
-  if (next !== state.current) {
-    state.current = next;
-    renderQuestion();
-    renderPalette();
-  }
-}
-
+/* ---------------- Flagging ---------------- */
 function toggleFlag() {
   if (state.submitted) return;
   const qid = state.pack.questions[state.current].id;
@@ -874,26 +1243,45 @@ function toggleFlag() {
 function submitExam(auto = false) {
   if (state.submitted) return;
   const total = state.pack.questions.length;
-  const answered = state.pack.questions.filter((q) => state.answers.has(q.id)).length;
+  const answered = state.pack.questions.filter((q) => isAnswered(q)).length;
   const unanswered = total - answered;
 
   const doSubmit = () => {
     if (state.timerId) clearInterval(state.timerId);
     state.submitted = true;
 
+    const mc = state.marking.correct;    // + marks per correct answer
+    const mn = state.marking.negative;   // − marks per wrong answer
     let correct = 0;
+    let earned = 0;
     const results = state.pack.questions.map((q) => {
       const chosen = state.answers.get(q.id);
-      const isCorrect = chosen === q.answerIndex;
-      if (isCorrect) correct += 1;
-      return { q, chosen, isCorrect, skipped: chosen === undefined };
+      const skipped = !isAnswered(q);
+      let isCorrect = false;
+      if (!skipped) {
+        if (isMultiQuestion(q)) {
+          // All-or-nothing: the chosen set must exactly match the correct set.
+          const sel = chosen.slice().sort((a, b) => a - b);
+          const correct = q.answerIndices.slice().sort((a, b) => a - b);
+          isCorrect = sel.join(",") === correct.join(",");
+        } else {
+          isCorrect = chosen === q.answerIndex;
+        }
+      }
+      let marks = 0;
+      if (isCorrect) { correct += 1; marks = mc; }
+      else if (!skipped) marks = -mn;
+      earned += marks;
+      return { q, chosen, isCorrect, skipped, marks };
     });
 
-    const pct = total ? Math.round((correct / total) * 100) : 0;
+    const maxPossible = total * mc;
+    const rawPct = maxPossible ? (earned / maxPossible) * 100 : 0;
+    const pct = Math.round(Math.max(0, rawPct));
     $("score-circle").style.setProperty("--pct", pct + "%");
     $("score-circle").innerHTML = `<span>${pct}%</span>`;
-    $("score-fraction").textContent = `${correct} / ${total}`;
-    $("score-grade").textContent = gradeFor(pct);
+    $("score-fraction").textContent = `${fmtMarks(earned)} / ${fmtMarks(maxPossible)}`;
+    $("score-grade").textContent = gradeFor(rawPct);
     $("stat-correct").textContent = String(correct);
     $("stat-wrong").textContent = String(total - correct - unanswered);
     $("stat-skipped").textContent = String(unanswered);
@@ -927,6 +1315,11 @@ function submitExam(auto = false) {
   };
 }
 
+function fmtMarks(n) {
+  const r = Math.round(n * 100) / 100;
+  return Number.isInteger(r) ? String(r) : r.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+}
+
 function gradeFor(pct) {
   if (pct >= 90) return "A — Excellent";
   if (pct >= 75) return "B — Good";
@@ -946,11 +1339,19 @@ function renderReview() {
 
     const qEl = document.createElement("p");
     qEl.className = "review-q";
-    qEl.textContent = `Q${i + 1}. ${q.question}${q.marks ? `  [${q.marks} mark${q.marks > 1 ? "s" : ""}]` : ""}`;
+    qEl.textContent = `Q${i + 1}. ${q.question}`;
+    const chip = document.createElement("span");
+    chip.className = "marks-chip " + (skipped || (!isCorrect && state.marking.negative === 0) ? "zero" : isCorrect ? "positive" : "negative");
+    chip.textContent = (skipped || (!isCorrect && state.marking.negative === 0))
+      ? "0"
+      : isCorrect ? `+${fmtMarks(state.marking.correct)}` : `−${fmtMarks(state.marking.negative)}`;
+    qEl.appendChild(chip);
 
     const ansEl = document.createElement("div");
     ansEl.className = "review-answers";
+    const multi = isMultiQuestion(q);
     const optText = (idx) => `${letters[idx] || idx + 1}. ${q.options[idx]}`;
+    const listText = (idxs) => idxs.map((i) => letters[i] || i + 1).join(", ");
 
     if (skipped) {
       const p = document.createElement("span");
@@ -959,13 +1360,15 @@ function renderReview() {
       ansEl.appendChild(p);
     } else {
       const p = document.createElement("span");
-      p.textContent = `Your answer: ${optText(chosen)}`;
+      p.textContent = multi ? `Your answer: ${listText(chosen)}` : `Your answer: ${optText(chosen)}`;
       p.className = "yours" + (isCorrect ? " ok" : "");
       ansEl.appendChild(p);
     }
     if (!isCorrect) {
       const p = document.createElement("span");
-      p.textContent = `Correct answer: ${optText(q.answerIndex)}`;
+      p.textContent = multi
+        ? `Correct answer: ${listText(q.answerIndices)}`
+        : `Correct answer: ${optText(q.answerIndex)}`;
       p.className = "correct-ans";
       ansEl.appendChild(p);
     }
@@ -1060,6 +1463,14 @@ $("home-btn").addEventListener("click", () => {
   showView("landing");
 });
 
+// Dark mode toggle (delegated — buttons live on landing, exam header, result)
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-theme-toggle]");
+  if (t) {
+    applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+  }
+});
+
 // Keyboard shortcuts
 document.addEventListener("keydown", (e) => {
   if (views.exam.hidden) return;
@@ -1069,9 +1480,14 @@ document.addEventListener("keydown", (e) => {
   else if (/^[a-dA-D]$/.test(e.key)) {
     const idx = e.key.toLowerCase().charCodeAt(0) - 97;
     const q = state.pack.questions[state.current];
-    if (idx < q.options.length) selectOption(q.id, idx);
+    if (idx < q.options.length) selectOption(q, idx);
   }
 });
+
+/* ---------------- Init ---------------- */
+initTheme();
+initTimerConfig();
+initMarkingConfig();
 </script>
 </body>
 </html>

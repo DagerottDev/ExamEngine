@@ -6,8 +6,8 @@ Two pieces:
    chapter plus a few sample exam questions and generates a difficulty-matched MCQ
    pack as JSON. It **always asks you for the number of MCQs first**.
 2. **A single-file exam website** (`mcq-exam-website/index.html`) where you upload the
-   generated JSON pack and take the exam in a real paper-style window (exam header,
-   countdown timer, question palette, A–D options, flagging, submit, score + review).
+   generated JSON pack and take the exam in a Prometric-style session — configurable
+   per-question timer, question palette, marking scheme, dark mode, and score + review.
 
 ---
 
@@ -66,10 +66,16 @@ python3 .agents/skills/mcq-pack-generator/scripts/validate_pack.py mcq-packs/my-
   "source": { "book": "...", "chapter": "...", "paperYear": "2025" },
   "questions": [
     { "id": 1, "question": "...", "options": ["a", "b", "c", "d"],
-      "answerIndex": 2, "explanation": "...", "topic": "...", "marks": 1 }
+      "answerIndex": 2, "explanation": "...", "topic": "...", "marks": 1 },
+    { "id": 2, "question": "...", "options": ["a", "b", "c", "d"],
+      "multiSelect": true, "answerIndices": [0, 2], "marks": 1 }
   ]
 }
 ```
+
+Single-answer questions use `answerIndex`; multi-select questions use
+`multiSelect: true` with an `answerIndices` array. Multi-select questions are
+scored all-or-nothing.
 
 ---
 
@@ -82,12 +88,20 @@ dependencies) — it works offline by double-clicking it, or over any static ser
 
 - **Upload**: drag & drop or browse for a `.json` pack. Invalid packs get a clear
   list of errors. A **Load sample pack** button demos it instantly.
-- **Exam window**: exam title / subject / type badge / difficulty header,
-  countdown timer (auto-submits at 0), question palette showing answered/flagged/
-  current state, serif "paper" typography with a classic red margin line, A–D
-  options, prev/next, and flag-for-review.
-- **Submit**: warns about unanswered questions, then shows score (%, correct /
-  wrong / skipped), a grade, and a full answer review with explanations.
+- **Exam window**: Prometric-style session — navy header with exam title / subject /
+  type badge / difficulty, a bottom toolbar (Previous / Mark for review / Next /
+  Submit), and a question palette showing answered/flagged/current state.
+- **Per-question timer**: set once on the landing page (minutes + seconds); every
+  question gets its own countdown pinned at the top right (always visible while
+  scrolling). Time-up auto-advances to the next question and auto-submits on the last.
+- **Marking scheme**: set once on the landing page — positive marks per correct
+  answer and negative marks per wrong answer (0 = no negative marking). Unanswered
+  questions score 0. The score screen shows net marks earned and per-question
+  marks in the review.
+- **Dark mode**: toggle available on the landing page, exam header, and results;
+  your choice is remembered between sessions.
+- **Submit**: warns about unanswered questions, then shows score (%, net marks,
+  correct / wrong / skipped), a grade, and a full answer review with explanations.
 - **Keyboard**: ← / → to navigate, `A`–`D` to answer, `F` to flag.
 
 Try it: open `mcq-exam-website/index.html` and click **Load sample pack**.

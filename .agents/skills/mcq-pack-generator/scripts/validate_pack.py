@@ -72,7 +72,7 @@ def validate(path):
             if not isinstance(q, dict):
                 errs(problems, f"{where} must be an object")
                 continue
-            for field in ("id", "question", "options", "answerIndex"):
+            for field in ("id", "question", "options"):
                 if field not in q:
                     errs(problems, f"{where} is missing required field: '{field}'")
 
@@ -97,11 +97,34 @@ def validate(path):
                 if len(opts) != len(set(o.strip().lower() for o in opts if isinstance(o, str))):
                     errs(problems, f"{where}.options contains duplicates")
 
-            ai = q.get("answerIndex")
-            if not isinstance(ai, int):
-                errs(problems, f"{where}.answerIndex must be an integer; got {ai!r}")
-            elif isinstance(opts, list) and not (0 <= ai < len(opts)):
-                errs(problems, f"{where}.answerIndex {ai} is out of range for {len(opts)} options (0-based)")
+            has_single = "answerIndex" in q
+            has_multi = "answerIndices" in q
+            if not has_single and not has_multi:
+                errs(problems, f"{where} is missing required field: 'answerIndex' (or 'answerIndices' for multi-select)")
+
+            if has_multi:
+                idxs = q.get("answerIndices")
+                if not isinstance(idxs, list) or len(idxs) < 2:
+                    errs(problems, f"{where}.answerIndices must be an array with at least 2 entries")
+                else:
+                    for j, v in enumerate(idxs):
+                        if not isinstance(v, int):
+                            errs(problems, f"{where}.answerIndices[{j}] must be an integer; got {v!r}")
+                    if len(idxs) != len(set(idxs)):
+                        errs(problems, f"{where}.answerIndices contains duplicates")
+                    if isinstance(opts, list):
+                        for v in idxs:
+                            if isinstance(v, int) and not (0 <= v < len(opts)):
+                                errs(problems, f"{where}.answerIndices entry {v} is out of range for {len(opts)} options (0-based)")
+                if q.get("multiSelect") is False:
+                    errs(problems, f"{where}.multiSelect must be true when 'answerIndices' is used")
+
+            if has_single and not has_multi:
+                ai = q.get("answerIndex")
+                if not isinstance(ai, int):
+                    errs(problems, f"{where}.answerIndex must be an integer; got {ai!r}")
+                elif isinstance(opts, list) and not (0 <= ai < len(opts)):
+                    errs(problems, f"{where}.answerIndex {ai} is out of range for {len(opts)} options (0-based)")
 
             marks = q.get("marks")
             if marks is not None and (not isinstance(marks, int) or marks < 0):

@@ -48,7 +48,7 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "question", "options", "answerIndex"],
+        "required": ["id", "question", "options"],
         "properties": {
           "id": { "type": "integer", "minimum": 1 },
           "question": { "type": "string", "minLength": 1 },
@@ -62,7 +62,18 @@
           "answerIndex": {
             "type": "integer",
             "minimum": 0,
-            "description": "0-based index of the correct option within options."
+            "description": "0-based index of the single correct option. Provide this OR 'answerIndices' (not both)."
+          },
+          "multiSelect": {
+            "type": "boolean",
+            "description": "Set to true for questions with multiple correct answers."
+          },
+          "answerIndices": {
+            "type": "array",
+            "description": "0-based indices of the correct options for multi-select questions. Provide this OR 'answerIndex' (not both).",
+            "minItems": 2,
+            "items": { "type": "integer", "minimum": 0 },
+            "uniqueItems": true
           },
           "explanation": { "type": "string" },
           "topic": { "type": "string" },
