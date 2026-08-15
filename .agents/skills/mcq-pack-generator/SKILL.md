@@ -1,138 +1,170 @@
 ---
 name: mcq-pack-generator
-description: Generates MCQ (multiple-choice question) JSON packs from book chapter screenshots and sample exam questions, with difficulty calibrated to match the source paper. Use when the user wants a practice question bank, quiz pack, or mock test in JSON, built from screenshots of study material and a few sample questions from the actual exam.
+description: Generates ExamEngine v2 MCQ packs from reference material and sample exam questions, with source grounding, calibrated difficulty, validation, and QA.
 ---
 
-# MCQ Pack Generator
+# MCQ Pack Generator — ExamEngine v2
 
-Turns screenshots of textbook/reference material plus a few sample questions from the
-real exam paper into a validated, difficulty-matched multiple-choice question pack
-written as JSON (ready to upload to the MCQ exam viewer website).
-
-## When to use this skill
-
-- The user provides screenshots (or image/PDF paths) of a book chapter or study notes.
-- The user provides a few sample questions from the actual exam paper.
-- The user wants an MCQ pack / practice set / mock test exported as JSON.
+Generate high-quality, source-grounded MCQ packs for ExamEngine. The output must conform to `resources/mcq-pack-schema.json` and pass `scripts/validate_pack.py` before completion.
 
 ## Golden rule
 
-**Always ask the user for the number of MCQs they want BEFORE doing anything else.**
-Never generate without an explicit count. If the user did not state a count, ask for it
-first, along with any preferences, and wait for the answer before proceeding.
+Always obtain the exact requested MCQ count before generating questions. Also collect source material and, when available, 2–5 representative questions from the target exam so difficulty and phrasing can be calibrated.
 
-## Workflow — follow these steps in order
+## Workflow
 
-### Step 1 — Ask before generating (mandatory)
+### 1. Collect requirements
 
-Before reading any input, ask the user:
+Get:
 
-1. **How many MCQs do you want in the pack?** (the exact count)
-2. Optional preferences: exam title, subject, topic focus, marks per question,
-   whether to include explanations, exam type (Quiz / Midterm / Final / Mock Test / Practice).
-3. Where the pack file should be saved (default: `<workspace>/mcq-packs/<slug>-mcq-pack.json`).
+- exact number of MCQs
+- exam title and subject when known
+- exam type
+- reference screenshots/PDF/pages/notes
+- representative sample exam questions
+- preferred timing/scoring if the user specifies them
+- output path; default to `mcq-packs/<slug>-mcq-pack.json`
 
-Wait for the user's answer. Do not generate anything yet.
+If the user has no sample paper, continue with `moderate` difficulty and state that difficulty was inferred rather than calibrated.
 
-### Step 2 — Collect the inputs
+### 2. Read and map the source
 
-Ask the user to provide, as file paths or images:
+Read every supplied source carefully. Create internal source references that can be attached to questions, for example:
 
-- **Reference screenshots**: 1 or more screenshots of the book chapter / study material
-  (the content the questions must be based on).
-- **Sample questions**: 2–5 sample questions from the actual exam paper
-  (these calibrate the difficulty).
-
-Read every image carefully with your vision. If a screenshot is blurry, cropped, or
-unreadable, do not guess — ask the user for a clearer screenshot.
-
-### Step 3 — Calibrate difficulty from the sample paper
-
-Study the sample questions and assess:
-
-- **Cognitive depth**: pure recall vs application, analysis, or calculation.
-- **Concept density**: how many concepts are combined in a single question.
-- **Distractor style**: are wrong options close/reasonable or obviously wrong?
-- **Question length & phrasing style** (e.g., "Which of the following…", "Identify…").
-
-From this, assign a difficulty rating to the whole pack:
-`easy`, `moderate`, `hard`, or `mixed` (if the paper mixes levels).
-
-Also note the paper's exam type, subject, and topic coverage, and copy the general
-tone/style of the sample questions into the generated ones.
-
-### Step 4 — Generate the questions
-
-Create **exactly** the number of MCQs the user requested. For every question:
-
-- 1 stem, **4 options** (3 distractors + 1 correct), unless the source paper clearly
-  uses a different option count — then mirror the paper.
-- Distractors must be **plausible** and drawn from the same topic area as the stem.
-- Correct answer position must be varied across the pack (don't always pick option C).
-- Avoid "all of the above" / "none of the above" unless the sample paper uses them.
-- Each question gets: `id` (1-based integer), `question`, `options` (array, string),
-  `answerIndex` (0-based index of the correct option).
-- Optionally add: `explanation`, `topic`, `marks`.
-- Every generated question must be grounded in the reference screenshots.
-- Match the difficulty rating from Step 3 — do not make questions harder or easier
-  than the sample paper.
-
-### Step 5 — Assemble and validate the pack
-
-Build the pack object exactly per `resources/mcq-pack-schema.json`:
-
-- `exam`: title, subject, examType, durationMinutes (suggest 60 unless told otherwise),
-  totalMarks, optional instructions.
-- `difficulty`: the rating from Step 3.
-- `source`: book title, chapter, paper year if known.
-- `questions`: the array from Step 4.
-
-Then validate before finishing:
-
-```bash
-python3 scripts/validate_pack.py <path-to-pack.json>
+```text
+chapter-5:p12
+screenshot-03
+notes-duration:section-2
 ```
 
-Fix any errors the validator reports (wrong answerIndex, bad option count, empty
-strings, duplicates, etc.). If the pack is valid, the script prints a success summary.
+Do not invent facts that are absent from the supplied material unless the user explicitly authorizes external knowledge.
 
-### Step 6 — Save and report
+### 3. Calibrate the target paper
 
-- Write the final JSON file to the agreed path (default `<workspace>/mcq-packs/…`).
-- Tell the user:
-  - the file path,
-  - the number of questions,
-  - the difficulty rating and what you based it on,
-  - where to upload it (the MCQ exam viewer website).
+Evaluate the sample questions for:
 
-## Output schema cheat sheet
+- recall vs understanding vs application vs analysis
+- concept density
+- calculation depth
+- distractor closeness
+- phrasing and length
+- option count
+- topic distribution
+
+Set the pack difficulty to `easy`, `moderate`, `hard`, or `mixed`. Set each question's `difficulty` and `cognitiveLevel` independently.
+
+### 4. Plan coverage before writing questions
+
+Create a coverage plan across topics/learning objectives so one easy concept is not overrepresented. For mixed papers, intentionally distribute question difficulty.
+
+### 5. Generate exactly the requested count
+
+For each question provide:
+
+- `id`
+- `question`
+- `options`
+- exactly one answer representation:
+  - single-select: `answerIndex`
+  - multi-select: `multiSelect: true` + `answerIndices`
+- `marks`
+- `negativeMarks`
+- `explanation`
+- `topic`
+- `difficulty`
+- `cognitiveLevel`
+- `learningObjective`
+- `sourceRefs`
+- `tags`
+- `confidence`
+- optional `sectionId`
+- optional `questionTimeSeconds`
+
+Distractors must be plausible and from the same conceptual neighborhood as the correct answer. Vary correct-answer positions. Avoid `all of the above` and `none of the above` unless the source paper uses them.
+
+### 6. Assemble ExamEngine v2 metadata
+
+Use:
 
 ```json
 {
-  "exam": { "title": "...", "subject": "...", "examType": "Mock Test",
-            "durationMinutes": 60, "totalMarks": 10, "instructions": "..." },
-  "difficulty": "moderate",
-  "source": { "book": "...", "chapter": "...", "paperYear": "2025" },
-  "questions": [
-    { "id": 1, "question": "...", "options": ["a", "b", "c", "d"],
-      "answerIndex": 2, "explanation": "...", "topic": "...", "marks": 1 }
-  ]
+  "schemaVersion": "2.0",
+  "exam": {
+    "title": "...",
+    "subject": "...",
+    "examType": "Mock Test",
+    "totalMarks": 20,
+    "instructions": "...",
+    "difficultyNote": "..."
+  },
+  "difficulty": "mixed",
+  "timing": {
+    "mode": "exam",
+    "examDurationSeconds": 3600
+  },
+  "scoring": {
+    "mode": "question"
+  },
+  "delivery": {
+    "mode": "exam",
+    "shuffleQuestions": false,
+    "shuffleOptions": false,
+    "seed": "stable-seed"
+  },
+  "source": {
+    "book": "...",
+    "chapter": "...",
+    "paperYear": "..."
+  },
+  "questions": []
 }
 ```
 
-## Troubleshooting
+Timing modes are `none`, `exam`, `question`, and `both`. Scoring modes are `question` and `uniform`. In question scoring mode, `exam.totalMarks` must equal the sum of question marks.
 
-- **Screenshot unreadable** → ask for a clearer/cropped screenshot instead of guessing.
-- **User gives no sample questions** → still ask for them; difficulty calibration
-  needs them. If truly unavailable, default to `moderate` and say so.
-- **User wants a different question count mid-task** → regenerate to the new count,
-  re-validate, overwrite the pack file.
-- **Validator complains about `answerIndex`** → remember it is 0-based; the correct
-  option is `options[answerIndex]`.
+### 7. Mandatory QA pass
 
-## Files in this skill
+Before validation, audit the whole pack for:
 
-- `SKILL.md` — this file.
-- `resources/mcq-pack-schema.json` — JSON Schema the pack must conform to.
-- `scripts/validate_pack.py` — run `python3 scripts/validate_pack.py <pack.json>` to check a pack.
-- `examples/sample-mcq-pack.json` — a complete, valid example pack.
+1. **Source grounding** — every answer is supported by its `sourceRefs`.
+2. **Difficulty fidelity** — difficulty matches the calibration samples.
+3. **Topic coverage** — requested/source-important topics are represented proportionately.
+4. **Duplicate concepts** — remove near-duplicate stems or questions testing the same fact without purpose.
+5. **Distractor quality** — distractors are plausible and not trivially eliminable.
+6. **Answer-position distribution** — avoid systematic answer-position bias.
+7. **Multi-select integrity** — all and only correct choices are in `answerIndices`.
+8. **Explanation correctness** — explanations justify the answer rather than merely repeat it.
+9. **Marks consistency** — calculated maximum equals `exam.totalMarks`.
+10. **Metadata quality** — topic, cognitive level, learning objective, source refs, and confidence are populated when supported.
+
+If a source fact is ambiguous, lower confidence and avoid presenting an unsupported interpretation as certain.
+
+### 8. Validate
+
+Run:
+
+```bash
+python3 .agents/skills/mcq-pack-generator/scripts/validate_pack.py <pack.json>
+```
+
+Fix every validation error before finishing. Warnings about missing explanations or source refs should also be resolved unless the user explicitly requested otherwise.
+
+### 9. Report
+
+Tell the user:
+
+- saved file path
+- question count
+- difficulty distribution
+- timing/scoring mode
+- important source coverage
+- validation result
+- any source ambiguity that remains
+
+## Adaptive retest requests
+
+ExamEngine can export `adaptive-retest-request` JSON after a completed exam. When the user supplies one, generate a new pack using its `focusTopics`, requested `count`, target difficulty, and source provenance. Do not repeat the prior question stems or merely paraphrase them.
+
+## Compatibility
+
+Generate schema v2 only. The browser can migrate old v1 packs for use, but newly generated packs must include `schemaVersion: "2.0"`.

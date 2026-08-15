@@ -1,0 +1,15 @@
+{
+  "name": "exam-engine",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:check": "node scripts/build.mjs --check",
+    "test": "node --test tests/*.test.mjs",
+    "test:validator": "python3 -m unittest tests/validator_test.py",
+    "validate:sample": "python3 .agents/skills/mcq-pack-generator/scripts/validate_pack.py mcq-exam-website/sample-mcq-pack.json",
+    "verify": "npm test && npm run test:validator && npm run validate:sample"
+  },
+  "engines": { "node": ">=20" }
+}

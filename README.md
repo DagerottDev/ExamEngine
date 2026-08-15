@@ -1,117 +1,166 @@
-# MCQ Pack Generator — Antigravity skill + Exam Viewer website
+# ExamEngine v2
 
-Two pieces:
+ExamEngine is an offline-first MCQ exam and adaptive-study system. It combines an Antigravity question-pack generator with a deterministic browser exam engine that can run as a single self-contained HTML file.
 
-1. **An Antigravity skill** (`mcq-pack-generator`) that takes screenshots of a book
-   chapter plus a few sample exam questions and generates a difficulty-matched MCQ
-   pack as JSON. It **always asks you for the number of MCQs first**.
-2. **A single-file exam website** (`mcq-exam-website/index.html`) where you upload the
-   generated JSON pack and take the exam in a Prometric-style session — configurable
-   per-question timer, question palette, marking scheme, dark mode, and score + review.
+## What changed in v2
 
----
+- Schema-versioned packs (`schemaVersion: "2.0"`)
+- Pack-controlled timing: exam timer, per-question timer, both, or none
+- Per-question weighted marks and negative marking, with an optional uniform scoring mode
+- Strict single-answer vs multi-select validation
+- Deterministic seeded question/option shuffling
+- Sections and question metadata (topic, difficulty, cognitive level, learning objective)
+- Source references and confidence metadata for generated questions
+- Exam mode and study mode
+- Autosave and resume
+- Persistent attempt history
+- Wrong-answer notebook
+- Topic-level performance analytics and weak-topic detection
+- Retest of wrong/skipped questions
+- Exportable result JSON and adaptive 15-question retest request
+- Legacy v1 pack migration in the browser
+- Node unit tests, Python validator parity tests, and GitHub Actions CI
+- Reproducible single-file offline build
 
-## 1. The Antigravity skill
+## Repository layout
 
-### Where it lives (already in this repo)
-
-```
+```text
 .agents/skills/mcq-pack-generator/
-├── SKILL.md                        # the skill instructions
-├── resources/mcq-pack-schema.json  # JSON Schema for the pack
-├── scripts/validate_pack.py        # self-contained validator (no pip needed)
-└── examples/sample-mcq-pack.json   # a complete example pack
+  SKILL.md
+  resources/mcq-pack-schema.json
+  scripts/validate_pack.py
+  examples/sample-mcq-pack.json
+
+schema/
+  mcq-pack.v2.schema.json
+
+src/
+  core/exam-engine.js       # deterministic validation, timers, scoring, analytics
+  app.js                    # browser workflow and persistence
+  index.html                # development shell
+  styles.css
+
+scripts/
+  build.mjs                 # creates the self-contained offline viewer
+
+tests/
+  core.test.mjs
+  validator_test.py
+
+mcq-exam-website/
+  index.html                # generated single-file distribution
+  sample-mcq-pack.json
 ```
 
-Because it's in this workspace's `.agents/skills/`, Antigravity picks it up
-automatically when you open this folder. To make it available in **every** project,
-copy the `mcq-pack-generator` folder to your global skills dir:
+## Run verification
 
-- macOS / Linux: `~/.gemini/config/skills/mcq-pack-generator/`
-- Windows: `%USERPROFILE%\.gemini\config\skills\mcq-pack-generator\`
-
-(Antigravity also still supports the older `.agent/skills/` path.)
-
-### How to use it in Antigravity
-
-Just describe the task, e.g.:
-
-> Use mcq-pack-generator. I'll send screenshots of chapter 5 and 3 sample questions
-> from last year's paper.
-
-The skill will then, in order:
-
-1. **Ask you how many MCQs you want** (before doing anything else).
-2. Ask you for the **screenshots** of the book chapter reference + sample questions.
-3. Read the screenshots and **calibrate difficulty** from the sample questions
-   (easy / moderate / hard / mixed).
-4. Generate exactly the number of MCQs requested, grounded in the reference, and
-   write the pack to `mcq-packs/<paper-slug>-mcq-pack.json` (default) or a path you
-   choose.
-5. Validate the pack with `python3 scripts/validate_pack.py <pack.json>`.
-
-### Validating a pack yourself
+Requires Node 20+ and Python 3.
 
 ```bash
-python3 .agents/skills/mcq-pack-generator/scripts/validate_pack.py mcq-packs/my-pack.json
+npm run verify
+python3 -m unittest tests/validator_test.py
 ```
 
-### Pack format
+Validate a pack directly:
+
+```bash
+python3 .agents/skills/mcq-pack-generator/scripts/validate_pack.py path/to/pack.json
+```
+
+## Build the offline viewer
+
+```bash
+npm run build
+```
+
+This combines `src/index.html`, `src/styles.css`, `src/core/exam-engine.js`, `src/app.js`, and the sample pack into:
+
+```text
+mcq-exam-website/index.html
+```
+
+The generated file has no runtime dependencies and can be opened offline.
+
+GitHub Actions runs tests, validates the sample pack, rebuilds the distribution, and commits the generated viewer after successful branch pushes.
+
+## Pack v2 overview
 
 ```json
 {
-  "exam": { "title": "...", "subject": "...", "examType": "Mock Test",
-            "durationMinutes": 60, "totalMarks": 20, "instructions": "..." },
-  "difficulty": "moderate",
-  "source": { "book": "...", "chapter": "...", "paperYear": "2025" },
+  "schemaVersion": "2.0",
+  "exam": {
+    "title": "Fixed Income Mock",
+    "subject": "Fixed Income",
+    "examType": "Mock Test",
+    "totalMarks": 20
+  },
+  "difficulty": "mixed",
+  "timing": {
+    "mode": "both",
+    "examDurationSeconds": 1800,
+    "defaultQuestionSeconds": 90
+  },
+  "scoring": { "mode": "question" },
+  "delivery": {
+    "mode": "exam",
+    "shuffleQuestions": true,
+    "shuffleOptions": true,
+    "seed": "mock-01"
+  },
   "questions": [
-    { "id": 1, "question": "...", "options": ["a", "b", "c", "d"],
-      "answerIndex": 2, "explanation": "...", "topic": "...", "marks": 1 },
-    { "id": 2, "question": "...", "options": ["a", "b", "c", "d"],
-      "multiSelect": true, "answerIndices": [0, 2], "marks": 1 }
+    {
+      "id": 1,
+      "question": "...",
+      "options": ["A", "B", "C", "D"],
+      "answerIndex": 2,
+      "marks": 2,
+      "negativeMarks": 0.5,
+      "topic": "Duration",
+      "difficulty": "hard",
+      "cognitiveLevel": "apply",
+      "learningObjective": "Apply modified duration to a price-change estimate.",
+      "sourceRefs": ["chapter-5:p23"],
+      "tags": ["duration"],
+      "confidence": 0.95
+    }
   ]
 }
 ```
 
-Single-answer questions use `answerIndex`; multi-select questions use
-`multiSelect: true` with an `answerIndices` array. Multi-select questions are
-scored all-or-nothing.
+Single-answer questions use `answerIndex`. Multi-select questions must use `multiSelect: true` and `answerIndices`, and must not include `answerIndex`.
 
----
+`exam.totalMarks` must equal the calculated maximum score. In `question` scoring mode this is the sum of each question's `marks`; in `uniform` mode it is `questions.length × scoring.correctMarks`.
 
-## 2. The exam viewer website
+## Timer correctness
 
-`mcq-exam-website/index.html` is **one self-contained file** (CSS + JS inline, no
-dependencies) — it works offline by double-clicking it, or over any static server.
+The old viewer reset a question timer whenever the candidate navigated away and returned. v2 stores remaining time per question and subtracts elapsed wall-clock time. The overall exam timer uses an absolute deadline. Revisiting a question therefore cannot restore time.
 
-### What it does
+## Adaptive learning flow
 
-- **Upload**: drag & drop or browse for a `.json` pack. Invalid packs get a clear
-  list of errors. A **Load sample pack** button demos it instantly.
-- **Exam window**: Prometric-style session — navy header with exam title / subject /
-  type badge / difficulty, a bottom toolbar (Previous / Mark for review / Next /
-  Submit), and a question palette showing answered/flagged/current state.
-- **Per-question timer**: set once on the landing page (minutes + seconds); every
-  question gets its own countdown pinned at the top right (always visible while
-  scrolling). Time-up auto-advances to the next question and auto-submits on the last.
-- **Marking scheme**: set once on the landing page — positive marks per correct
-  answer and negative marks per wrong answer (0 = no negative marking). Unanswered
-  questions score 0. The score screen shows net marks earned and per-question
-  marks in the review.
-- **Dark mode**: toggle available on the landing page, exam header, and results;
-  your choice is remembered between sessions.
-- **Submit**: warns about unanswered questions, then shows score (%, net marks,
-  correct / wrong / skipped), a grade, and a full answer review with explanations.
-- **Keyboard**: ← / → to navigate, `A`–`D` to answer, `F` to flag.
+```text
+Reference material
+      ↓
+MCQ generator
+      ↓
+Validated v2 pack
+      ↓
+Exam / Study session
+      ↓
+Scoring + topic analytics
+      ↓
+Weak-topic detection
+      ↓
+Wrong-answer retest or adaptive-request export
+      ↓
+Generate a new targeted pack
+```
 
-Try it: open `mcq-exam-website/index.html` and click **Load sample pack**.
-`mcq-exam-website/sample-mcq-pack.json` is the same pack as a downloadable file
-for testing the upload path.
+The exported adaptive request contains weak topics, prior wrong question IDs to avoid repeating, target difficulty, requested count, subject, and source provenance.
 
----
+## Local data
 
-## Quickstart checklist
+Exam sessions, attempt history, theme preference, and the wrong-answer notebook are stored in browser `localStorage`. They are not sent to a server by ExamEngine.
 
-1. Open this folder in Antigravity — the `mcq-pack-generator` skill is live.
-2. Ask it to generate a pack (it will ask how many MCQs you want first).
-3. Open `mcq-exam-website/index.html` in a browser and upload the generated pack.
+## Generator skill
+
+Open this repository in Antigravity and invoke `mcq-pack-generator`. The skill asks for the desired question count, source screenshots/material, and sample exam questions before generation. It performs a QA pass for source grounding, difficulty match, topic coverage, distractor quality, duplicate concepts, answer-position balance, and schema validity before saving the pack.
