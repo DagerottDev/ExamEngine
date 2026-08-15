@@ -1,131 +1,46 @@
 {
+  "schemaVersion": "2.0",
   "exam": {
     "title": "Cell Biology — Unit Test",
     "subject": "Biology",
     "examType": "Mock Test",
-    "durationMinutes": 15,
-    "totalMarks": 8,
-    "instructions": "Each question carries 1 mark. Choose the single best option. No negative marking.",
+    "totalMarks": 9,
+    "instructions": "Each question carries 1 mark. Some questions have multiple correct answers — select all that apply.",
     "difficultyNote": "Calibrated from 3 sample questions of the 2025 paper: recall-based with a few application items."
   },
   "difficulty": "moderate",
+  "timing": {
+    "mode": "both",
+    "examDurationSeconds": 900,
+    "defaultQuestionSeconds": 60
+  },
+  "scoring": {
+    "mode": "question"
+  },
+  "delivery": {
+    "mode": "exam",
+    "shuffleQuestions": false,
+    "shuffleOptions": false,
+    "seed": "cell-biology-2025"
+  },
   "source": {
     "book": "NCERT Biology — Class XI",
     "chapter": "Cell: The Unit of Life",
     "paperYear": "2025"
   },
+  "sections": [
+    {"id": "cell-structure", "title": "Cell Structure"},
+    {"id": "organelles", "title": "Cell Organelles"}
+  ],
   "questions": [
-    {
-      "id": 1,
-      "question": "Which of the following is the main site of ATP synthesis in a eukaryotic cell?",
-      "options": [
-        "Rough endoplasmic reticulum",
-        "Mitochondria",
-        "Golgi apparatus",
-        "Lysosome"
-      ],
-      "answerIndex": 1,
-      "explanation": "Mitochondria are the powerhouse of the cell; oxidative phosphorylation and most ATP generation occur on their inner membrane.",
-      "topic": "Cell organelles",
-      "marks": 1
-    },
-    {
-      "id": 2,
-      "question": "Ribosomes are composed of which of the following?",
-      "options": [
-        "RNA and proteins",
-        "DNA and proteins",
-        "Lipids and RNA",
-        "Only proteins"
-      ],
-      "answerIndex": 0,
-      "explanation": "Ribosomes are nucleoprotein complexes made of ribosomal RNA (rRNA) and proteins, assembled in the nucleolus.",
-      "topic": "Cell organelles",
-      "marks": 1
-    },
-    {
-      "id": 3,
-      "question": "Which organelle is responsible for the intracellular digestion of worn-out organelles and foreign material?",
-      "options": [
-        "Peroxisome",
-        "Lysosome",
-        "Vacuole",
-        "Centrosome"
-      ],
-      "answerIndex": 1,
-      "explanation": "Lysosomes contain hydrolytic enzymes (acid hydrolases) that digest macromolecules, worn-out organelles, and engulfed pathogens.",
-      "topic": "Cell organelles",
-      "marks": 1
-    },
-    {
-      "id": 4,
-      "question": "The semifluid matrix filling the space between the nuclear envelope and the cell membrane is called the:",
-      "options": [
-        "Nucleoplasm",
-        "Cytosol",
-        "Cytoplasm",
-        "Protoplasm"
-      ],
-      "answerIndex": 2,
-      "explanation": "Cytoplasm is the semifluid matrix between the nuclear envelope and plasma membrane; cytosol is its soluble part excluding organelles.",
-      "topic": "Cell structure",
-      "marks": 1
-    },
-    {
-      "id": 5,
-      "question": "Which of the following cell organelles is bounded by a single membrane?",
-      "options": [
-        "Mitochondria",
-        "Plastids",
-        "Lysosomes",
-        "Nucleus"
-      ],
-      "answerIndex": 2,
-      "explanation": "Lysosomes are single-membrane-bound organelles; mitochondria, plastids, and the nucleus have double membranes.",
-      "topic": "Cell organelles",
-      "marks": 1
-    },
-    {
-      "id": 6,
-      "question": "Which of the following statements about the cell wall is correct?",
-      "options": [
-        "It is present in animal cells and made of cholesterol",
-        "It is found in plant cells and provides structural support",
-        "It regulates the movement of all molecules in and out of the cell",
-        "It is a selectively permeable membrane made of phospholipids"
-      ],
-      "answerIndex": 1,
-      "explanation": "Plant cell walls are made chiefly of cellulose, provide rigidity and support, and are freely permeable — unlike the plasma membrane.",
-      "topic": "Cell structure",
-      "marks": 1
-    },
-    {
-      "id": 7,
-      "question": "A student observes a cell with a prominent nucleus, a large central vacuole, and a cell wall. The cell is most likely a:",
-      "options": [
-        "Red blood cell",
-        "Neuron",
-        "Plant cell",
-        "Bacterial cell"
-      ],
-      "answerIndex": 2,
-      "explanation": "A cell wall and large central vacuole are characteristic of mature plant cells; RBCs, neurons, and bacteria lack both together.",
-      "topic": "Cell structure",
-      "marks": 1
-    },
-    {
-      "id": 8,
-      "question": "The structural organisation of the nucleus includes the nuclear envelope, nucleoplasm, nucleolus, and:",
-      "options": [
-        "Chromatin",
-        "Plasmodesmata",
-        "Peroxisomes",
-        "Microtubules"
-      ],
-      "answerIndex": 0,
-      "explanation": "The nucleus comprises the nuclear envelope, nucleoplasm, nucleolus, and chromatin (DNA + histone proteins).",
-      "topic": "Nucleus",
-      "marks": 1
-    }
+    {"id":1,"question":"Which of the following is the main site of ATP synthesis in a eukaryotic cell?","options":["Rough endoplasmic reticulum","Mitochondria","Golgi apparatus","Lysosome"],"answerIndex":1,"marks":1,"negativeMarks":0.25,"explanation":"Oxidative phosphorylation and most ATP generation occur on the inner mitochondrial membrane.","topic":"Cell organelles","difficulty":"easy","cognitiveLevel":"remember","learningObjective":"Identify the primary organelle responsible for ATP synthesis.","sourceRefs":["cell-unit:p1"],"tags":["mitochondria","ATP"],"confidence":0.99,"sectionId":"organelles"},
+    {"id":2,"question":"Ribosomes are composed of which of the following?","options":["RNA and proteins","DNA and proteins","Lipids and RNA","Only proteins"],"answerIndex":0,"marks":1,"negativeMarks":0.25,"explanation":"Ribosomes are nucleoprotein complexes made of rRNA and proteins.","topic":"Cell organelles","difficulty":"easy","cognitiveLevel":"remember","learningObjective":"Recall ribosome composition.","sourceRefs":["cell-unit:p2"],"tags":["ribosome","rRNA"],"confidence":0.99,"sectionId":"organelles"},
+    {"id":3,"question":"Which organelle is responsible for the intracellular digestion of worn-out organelles and foreign material?","options":["Peroxisome","Lysosome","Vacuole","Centrosome"],"answerIndex":1,"marks":1,"negativeMarks":0.25,"explanation":"Lysosomes contain hydrolytic enzymes that digest macromolecules, worn-out organelles, and engulfed material.","topic":"Cell organelles","difficulty":"easy","cognitiveLevel":"understand","learningObjective":"Connect lysosomal enzymes with intracellular digestion.","sourceRefs":["cell-unit:p3"],"tags":["lysosome"],"confidence":0.98,"sectionId":"organelles"},
+    {"id":4,"question":"The semifluid matrix filling the space between the nuclear envelope and the cell membrane is called the:","options":["Nucleoplasm","Cytosol","Cytoplasm","Protoplasm"],"answerIndex":2,"marks":1,"negativeMarks":0.25,"explanation":"Cytoplasm is the semifluid material between the nuclear envelope and plasma membrane; cytosol is its soluble component.","topic":"Cell structure","difficulty":"moderate","cognitiveLevel":"understand","learningObjective":"Differentiate cytoplasm from cytosol and nucleoplasm.","sourceRefs":["cell-unit:p1"],"tags":["cytoplasm"],"confidence":0.97,"sectionId":"cell-structure"},
+    {"id":5,"question":"Which of the following cell organelles is bounded by a single membrane?","options":["Mitochondria","Plastids","Lysosomes","Nucleus"],"answerIndex":2,"marks":1,"negativeMarks":0.25,"explanation":"Lysosomes are single-membrane-bound; mitochondria, plastids, and the nucleus are bounded by double membranes.","topic":"Cell organelles","difficulty":"moderate","cognitiveLevel":"understand","learningObjective":"Classify organelles by membrane structure.","sourceRefs":["cell-unit:p3"],"tags":["membranes","lysosome"],"confidence":0.98,"sectionId":"organelles"},
+    {"id":6,"question":"Which of the following statements about the cell wall is correct?","options":["It is present in animal cells and made of cholesterol","It is found in plant cells and provides structural support","It regulates the movement of all molecules in and out of the cell","It is a selectively permeable membrane made of phospholipids"],"answerIndex":1,"marks":1,"negativeMarks":0.25,"explanation":"Plant cell walls provide rigidity and structural support and are distinct from the selectively permeable plasma membrane.","topic":"Cell structure","difficulty":"moderate","cognitiveLevel":"understand","learningObjective":"Distinguish the cell wall from the plasma membrane.","sourceRefs":["cell-unit:p1"],"tags":["cell-wall","plant-cell"],"confidence":0.98,"sectionId":"cell-structure"},
+    {"id":7,"question":"A student observes a cell with a prominent nucleus, a large central vacuole, and a cell wall. The cell is most likely a:","options":["Red blood cell","Neuron","Plant cell","Bacterial cell"],"answerIndex":2,"marks":1,"negativeMarks":0.25,"explanation":"A cell wall and large central vacuole are characteristic of mature plant cells.","topic":"Cell structure","difficulty":"moderate","cognitiveLevel":"apply","learningObjective":"Infer cell type from observed structures.","sourceRefs":["cell-unit:p1"],"tags":["plant-cell","vacuole"],"confidence":0.99,"sectionId":"cell-structure"},
+    {"id":8,"question":"The structural organisation of the nucleus includes the nuclear envelope, nucleoplasm, nucleolus, and:","options":["Chromatin","Plasmodesmata","Peroxisomes","Microtubules"],"answerIndex":0,"marks":1,"negativeMarks":0.25,"explanation":"The nucleus comprises the nuclear envelope, nucleoplasm, nucleolus, and chromatin.","topic":"Nucleus","difficulty":"easy","cognitiveLevel":"remember","learningObjective":"Recall the structural components of the nucleus.","sourceRefs":["cell-unit:p4"],"tags":["nucleus","chromatin"],"confidence":0.99,"sectionId":"cell-structure"},
+    {"id":9,"question":"Which of the following are part of the endomembrane system?","options":["Endoplasmic reticulum","Golgi apparatus","Mitochondria","Lysosomes"],"multiSelect":true,"answerIndices":[0,1,3],"marks":1,"negativeMarks":0.25,"explanation":"The endomembrane system includes the ER, Golgi apparatus, lysosomes, and vacuoles; mitochondria are excluded.","topic":"Cell organelles","difficulty":"hard","cognitiveLevel":"analyze","learningObjective":"Classify organelles that participate in the endomembrane system.","sourceRefs":["cell-unit:p3"],"tags":["endomembrane-system"],"confidence":0.97,"sectionId":"organelles"}
   ]
 }
