@@ -1,0 +1,40 @@
+name: ExamEngine CI
+
+on:
+  push:
+    branches: [main, "goal/**"]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Core unit tests
+        run: npm test
+      - name: Python validator parity tests
+        run: python3 -m unittest tests/validator_test.py
+      - name: Validate sample pack
+        run: npm run validate:sample
+      - name: Build offline single-file distribution
+        run: npm run build
+      - name: Publish generated distribution back to branch
+        if: github.event_name == 'push'
+        run: |
+          git add mcq-exam-website/index.html
+          if git diff --cached --quiet; then
+            echo "Distribution already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Build offline ExamEngine v2 distribution [skip ci]"
+          git push
