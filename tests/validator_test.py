@@ -2,6 +2,7 @@ import copy
 import importlib.util
 import json
 import pathlib
+import subprocess
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -58,6 +59,32 @@ class ValidatorParityTests(unittest.TestCase):
                     target[path[-1]] = value
                     errors, _ = validator.validate_data(pack)
                     self.assertTrue(errors)
+
+    def test_optional_identity_and_source_binding_javascript_parity(self):
+        valid = copy.deepcopy(self.sample)
+        valid["packId"] = "family"
+        valid["questions"][0]["questionUid"] = "question"
+        valid["questions"][0]["sourceBindings"] = [{"sourceId": "source", "page": 2, "excerpt": "Paragraph"}]
+        variants = [valid]
+        for path, value in [(('packId',), None), (('questions', 0, 'questionUid'), ''),
+                            (('questions', 0, 'sourceBindings'), 'source'),
+                            (('questions', 0, 'sourceBindings'), [{'sourceId': 'source', 'page': True}]),
+                            (('questions', 0, 'sourceBindings'), [{'sourceId': 'source', 'excerpt': None}])]:
+            variant = copy.deepcopy(valid)
+            target = variant
+            for key in path[:-1]:
+                target = target[key]
+            target[path[-1]] = value
+            variants.append(variant)
+        duplicate = copy.deepcopy(valid)
+        duplicate['questions'][1]['questionUid'] = 'question'
+        variants.append(duplicate)
+        script = "import {validatePack} from './src/core/exam-engine.js'; let input=''; for await (const chunk of process.stdin) input+=chunk; console.log(JSON.stringify(JSON.parse(input).map(pack=>validatePack(pack).length===0)));"
+        result = subprocess.run(['node', '--input-type=module', '-e', script], input=json.dumps(variants), text=True, capture_output=True, check=True, cwd=ROOT)
+        js_validity = json.loads(result.stdout)
+        python_validity = [not validator.validate_data(variant)[0] for variant in variants]
+        self.assertEqual(js_validity, python_validity)
+        self.assertEqual(js_validity, [True] + [False] * (len(variants) - 1))
 
 
 if __name__ == "__main__":

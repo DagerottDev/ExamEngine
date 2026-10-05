@@ -1,155 +1,100 @@
 # Roadmap
 
-This roadmap starts from the verified ExamEngine v2 baseline merged to `main` on 2026-08-16. Items below are **not implemented unless explicitly marked complete**.
+The roadmap preserves the verified historical v2 exam baseline and the complete eight-area local study-workspace goal. “Present in source” and “accepted in the browser” are separate states. Current evidence belongs in [E2E_REPORT](E2E_REPORT.md); current release gates are in [PROJECT_STATUS](PROJECT_STATUS.md).
 
-## Baseline — v2 offline milestone
+## Historical baseline — v2
 
-**Status: ✅ Complete**
+The merged v2 milestone delivered schema 2.0 validation, deterministic timers/scoring/shuffling, legacy packs, single/multi answers, exam/study modes, sections and learning metadata, local resume/history/notebook, topic analytics, wrong/skipped retests, adaptive-request and result exports, modular source, the generated single-file viewer, generator QA, tests, and CI. It remains the regression baseline.
 
-Delivered:
+## Current milestone — complete local study workspace
 
-- schema v2 and strict validation
-- deterministic timers/scoring/shuffling
-- legacy pack migration
-- exam and study modes
-- sections and learning metadata
-- autosave/resume
-- attempt history
-- wrong-answer notebook
-- topic analytics and weak-topic detection
-- wrong/skipped retest
-- adaptive retest request export
-- source references
-- result export
-- modular source architecture
-- offline single-file build
-- core tests, validator tests and GitHub Actions CI
+All eight areas have exposed source/UI. None can be silently reduced to a placeholder to finish the milestone; close acceptance with real workflow evidence.
+
+| Area | Required acceptance |
+| --- | --- |
+| Appearance/layout | Presets and individual controls, previews/resets, timer/palette placements, embedded fonts, theme/accent, card drag/keyboard ordering, motion, responsive/zoom behavior |
+| Portable backups | Full data/attachment export, password encryption and errors, human-readable preview, merge/replace/conflicts, preferences/session semantics, atomic rollback and undo |
+| Pack authoring | Incomplete draft safety/autosave, question/answer metadata, reorder/duplicate/delete, timing/scoring, validation/export, identities/revisions and historical references |
+| Local sources | Real text/images/PDFs, multiple question file/page/excerpt links, page/zoom/text layer, missing-source recovery, limits/safe bytes, source deletion guards and offline cleanup |
+| Adaptive requests | Editable topics/count/difficulty/question type, provenance and avoid identities, real download and generator-compatible payload |
+| Custom mocks | Latest saved questions, deterministic balance, pack/topic/difficulty/recency filters, pool-size errors, explicit timing, source/uniform marks, origin identity/revision |
+| Daily revision | Actionable due queue, confidence/mistake/unclear notes, correct interval progression and daily cap, local-calendar/DST behavior, changed/archived questions |
+| Detailed progress | Reopened detailed attempts, relevant pack/revision context, comparable first/retest information, score/time/topic/confidence/mistake trends and honest sample sizes |
+
+Native IndexedDB one-time migration/original preservation, dirty-key writes, transaction failure/stale-tab rejection, owner takeover/resume expiry, persistent/temporary storage copy, accessible dialogs, actual downloads, and offline packaging are cross-cutting acceptance gates. Finish them before calling the workspace released. Manual backups to cloud folders remain the implemented portability approach; direct provider synchronization is a later phase.
 
 ## P1 — Browser reliability and UX hardening
 
-**Goal:** increase confidence in the complete browser workflow, not just the deterministic core.
+- [x] Complete and record the current workspace acceptance matrix without narrowing its scope.
+- [x] Maintain reproducible native storage/workflow harnesses and gate Pages publication on their Chromium results.
+- [x] Test upload → save → exam/study → submit → progress → retest/revision flows, including reload and expiry. Background/physical-device coverage can be broadened.
+- [x] Exercise storage denied, injected quota failures, corruption/tamper rejection, import rollback, real downloads, and multi-tab takeover. Browser eviction is a documented external-data-loss boundary.
+- [x] Document verified Chromium and actual `file://`/offline backup/PDF/font behavior.
+- [x] Verify keyboard/dialog focus, contrast, reduced motion, responsive layouts, CSS zoom and the equivalent reduced viewport.
+- [ ] Broaden to native browser zoom, OS screen-reader speech, Safari/Firefox, and physical touch devices.
+- [ ] Add larger pack/source fixtures and startup/navigation/rendering performance budgets after measured bottlenecks.
 
-- [ ] Add Playwright browser E2E tests
-- [ ] Cover upload → exam → submit → analytics → retest workflow
-- [ ] Test resume after reload during timed exams
-- [ ] Test browser background/throttling timing behavior
-- [ ] Add automated accessibility checks
-- [ ] Improve keyboard/screen-reader semantics across palette, timers and modals
-- [ ] Add corrupted/localStorage recovery behavior
-- [ ] Add explicit session reset/data-management controls
-- [ ] Add larger stress fixtures (hundreds/thousands of questions)
-- [ ] Add performance budgets for startup, question navigation and result rendering
+Exit: critical full workflows have recorded evidence, no known timer/scoring/data-loss regressions, and the supported accessibility/browser baseline is explicit.
 
-### Exit criteria
+## P2 — Deeper adaptive learning
 
-- critical browser workflows covered by E2E tests;
-- no known timer/scoring regression across supported browsers;
-- accessibility baseline documented and automatically checked.
+Source now includes daily review intervals, exposure filtering, confidence/mistake/unclear notes, and configurable adaptive requests. Finish their current acceptance above, then consider:
 
-## P2 — Richer adaptive learning
+- [ ] Learning-objective tracking beyond topic summaries.
+- [ ] Better mastery/confidence trends with clearly comparable contexts and sample counts.
+- [ ] Configurable adaptive difficulty progression.
+- [ ] Richer targeted retest blueprints from history and repetition/exposure controls.
+- [ ] First-attempt/retest comparisons over time and explanation-quality feedback.
 
-**Goal:** move from weak-topic reporting to a stronger learning system.
+Exit: history produces actionable recommendations with understandable evidence; neither small samples nor mixed packs are presented as proven mastery.
 
-- [ ] Track repeated attempts by learning objective, not only topic
-- [ ] Add spaced-repetition scheduling for wrong/weak concepts
-- [ ] Add mastery/confidence trend over time
-- [ ] Add configurable adaptive difficulty progression
-- [ ] Add question exposure/repetition controls
-- [ ] Generate targeted retest blueprints automatically from attempt history
-- [ ] Add comparison of first-attempt vs retest performance
-- [ ] Add explanation-quality feedback and “still unclear” tagging
-- [ ] Add source-view navigation from `sourceRefs` when source assets are available
+## P3 — Further content management
 
-### Exit criteria
+Source now includes visual drafts/editor, question operations, validation/export, local sources, and pack/question identity/revision tracking. Preserve those workflows and later consider:
 
-- learning history produces an actionable study queue;
-- mastery is tracked consistently across attempts;
-- retest selection balances weakness, recency and repetition.
+- [ ] Pack merge/split utilities.
+- [ ] Bulk topic/tag/section editing.
+- [ ] Near-duplicate detection UI and pack-level QA reports.
+- [ ] CSV/other simple-format import/export.
+- [ ] Explicit pack migration CLI and additional schema-aware advanced metadata controls.
 
-## P3 — Pack authoring and content management
+The source-grounded generator's requirements, calibration, QA, and validation remain intact and independently reusable.
 
-**Goal:** make packs easier to create, inspect and maintain without manually editing JSON.
+## P4 — Optional account-backed synchronization
 
-- [ ] Add visual pack inspector/editor
-- [ ] Add schema-aware question editing
-- [ ] Add pack merge/split tools
-- [ ] Add bulk topic/tag/section editing
-- [ ] Add duplicate-question detection UI
-- [ ] Add pack-level QA report
-- [ ] Add import/export utilities for CSV and other simple formats
-- [ ] Add stable pack IDs and revision metadata
-- [ ] Add explicit schema migration CLI
+- [ ] Define a backend-neutral sync contract before choosing a provider.
+- [ ] Authentication and encrypted remote attempt/history storage.
+- [ ] Cross-device sessions/history with deterministic offline conflict handling.
+- [ ] User export/delete and observable sync failures.
 
-## P4 — Optional hosted sync layer
-
-**Goal:** preserve offline-first behavior while enabling account-backed synchronization.
-
-- [ ] Define backend-neutral sync contract
-- [ ] Add authentication
-- [ ] Add encrypted cloud attempt/history storage
-- [ ] Add cross-device session/history synchronization
-- [ ] Resolve offline/online conflicts deterministically
-- [ ] Add user data export/delete controls
-- [ ] Add observability for sync failures
-
-### Architecture constraint
-
-The deterministic exam core must remain runnable offline. Network failures must not invalidate an active local exam session.
+Network failures must not invalidate an active local session. Manual downloadable backups are already a distinct workflow; these planned tasks must not be advertised as existing cloud sync.
 
 ## P5 — Instructor/admin workflows
 
-**Goal:** support managed exam distribution when/if ExamEngine expands beyond personal study.
+- [ ] Assignments, rosters, attempt status, controlled pack/version publishing.
+- [ ] Availability windows/attempt limits, centralized results, aggregate analytics.
+- [ ] Role-based permissions and audit records.
 
-- [ ] Exam assignment model
-- [ ] Candidate roster and attempt status
-- [ ] Controlled pack/version publishing
-- [ ] Availability windows and attempt limits
-- [ ] Central result collection
-- [ ] Aggregate analytics
-- [ ] Role-based permissions
-- [ ] Audit log
+This needs a backend and a concrete institutional requirement. Keep it separate from local personal-study acceptance.
 
-This phase requires a backend and should not be mixed into the offline core prematurely.
+## P6 — Assessment integrity/security
 
-## P6 — Security and assessment integrity
+- [ ] Threat model for client-visible answers and managed assessment use.
+- [ ] Signed/encrypted assessment bundles where appropriate.
+- [ ] Secure hosted result submission and tamper-evident attempt metadata.
+- [ ] Hosted Content Security Policy and dependency/security review.
+- [ ] An explicit privacy/product decision before any proctoring work.
 
-**Goal:** harden hosted/managed assessment use cases.
-
-- [ ] Threat model for pack answer exposure
-- [ ] Signed/encrypted assessment bundles where appropriate
-- [ ] Secure hosted result submission
-- [ ] Tamper-evident attempt metadata
-- [ ] Content Security Policy for hosted distribution
-- [ ] Dependency/security scanning if external dependencies are introduced
-- [ ] Decide explicitly whether proctoring is in product scope
-
-Remote proctoring is **not** currently implemented and should only be added after privacy, legal and product requirements are defined.
+Backup encryption protects exported files; it is not assessment anti-cheating, local database encryption, or proctoring.
 
 ## P7 — Release engineering
 
-- [ ] Introduce semantic release tags (`v2.x.x`)
-- [ ] Add changelog/release notes automation
-- [ ] Publish downloadable offline build as a GitHub release asset
-- [ ] Add reproducible-build verification/hash
-- [ ] Add supported-browser matrix
-- [ ] Add release smoke-test checklist
+- [ ] Versioned release tags and release notes/changelog.
+- [ ] Downloadable generated HTML release assets.
+- [ ] Reproducible artifact hash/freshness verification.
+- [ ] Supported-browser matrix and release smoke checklist.
+- [ ] Record the complete workspace's acceptance before publishing/deploying it.
 
-## Suggested next implementation order
+## Order and constraints
 
-1. **P1 browser E2E + accessibility** — highest leverage for correctness confidence.
-2. **P2 adaptive learning depth** — strongest product-value extension of the current architecture.
-3. **P3 pack authoring tools** — reduces operational friction and improves content quality.
-4. **P7 release engineering** — formalize distribution once browser workflows are hardened.
-5. **P4/P5 hosted features** — only when multi-device or institutional use becomes a concrete requirement.
-
-## Non-goals for the immediate next milestone
-
-Unless requirements change, avoid prioritizing these before P1:
-
-- remote proctoring;
-- complex backend microservices;
-- multi-tenant LMS functionality;
-- real-time collaboration;
-- large UI framework migration.
-
-The current architecture already solves the core exam/study use case offline. The next milestone should first make that path exceptionally well-tested and robust.
+Finish the current eight-area milestone and P1 reliability first. Then deepen learning/content management and release evidence according to actual user needs. Account/admin extensions remain optional future scope. Preserve the free static Pages deployment, MIT/generator reuse notices, optional donation links, and offline operation throughout.

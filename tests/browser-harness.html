@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExamEngine browser storage checks</title><style>body{font:16px/1.6 system-ui;max-width:900px;margin:40px auto;padding:20px}li{padding:8px}pre{white-space:pre-wrap}</style><h1>Native browser storage checks</h1><p>Uses isolated temporary databases; your ExamEngine workspace is untouched.</p><ol id="results"></ol><pre id="summary" role="status">Running…</pre><script type="module">
+import {createWorkspaceStore,emptyWorkspace,identifyPack,canonical,sha256} from '../src/core/workspace.js';
+import {createSession} from '../src/core/exam-engine.js';
+import {encodeBackup,decodeBackup} from '../src/core/backup.js';
+const output=document.getElementById('results');let passed=0;
+const assert=(ok,text)=>{if(!ok)throw Error(text);};
+const check=async(title,fn)=>{await fn();passed++;const row=document.createElement('li');row.textContent=`PASS: ${title}`;output.append(row);};
+const sample=await (await fetch('../mcq-exam-website/sample-mcq-pack.json')).json();
+const db=`examengine-test-${crypto.randomUUID()}`;
+const legacy=new Map([['exam-engine:v2:resume',JSON.stringify({pack:sample,session:createSession(sample)})],['exam-engine:v2:history',JSON.stringify([{id:'legacy-attempt',title:'Old exam',date:Date.now(),earned:1,maxMarks:2,percentage:50,weakTopics:['Cells']}])],['exam-engine:v2:notebook',JSON.stringify([{examTitle:'Old exam',questionId:1,question:'Cell note'}])],['exam-engine:v2:theme','dark']]);
+const legacyStorage={getItem:key=>legacy.get(key)||null};
+let store,second;
+try{
+ store=await createWorkspaceStore({name:db,legacyStorage});
+ let w=await store.load();
+ await check('Legacy migration preserves originals and summary-only history',async()=>{assert(w.packs.length===1&&w.session&&w.attempts[0].summaryOnly&&w.notebook.length===1,'Migration data missing');assert(w.preferences.theme==='dark'&&legacy.has('exam-engine:v2:resume'),'Theme/originals missing');const reopened=await createWorkspaceStore({name:db,legacyStorage});assert((await reopened.load()).attempts.length===1,'Migration repeated');reopened.close();});
+ await check('Subset writes preserve saved packs and session',async()=>{w.preferences.accent='teal';await store.save(w,['preferences']);const read=await store.load();assert(read.preferences.accent==='teal'&&read.packs.length===1&&read.session.session.id===w.session.session.id,'Subset save changed unrelated records');});
+ const bytes=new TextEncoder().encode('Fixture chapter notes.');const source={id:'notes',name:'chapter.txt',type:'text/plain',size:bytes.length,data:btoa(String.fromCharCode(...bytes)),hash:await sha256(bytes)};
+ w.sources.push(source);const p=structuredClone(sample);p.exam.title='Source linked pack';p.questions[0].sourceBindings=[{sourceId:'notes',excerpt:'Fixture chapter notes.'}];w.packs.push(await identifyPack(p,w.packs));await store.save(w,['sources','packs']);
+ await check('Plain and encrypted backups preserve attachment bytes and timer deadlines',async()=>{const plain=await decodeBackup(JSON.stringify(await encodeBackup(w)));assert(plain.data.sources[0].data===source.data,'Attachment bytes changed');const decoded=await decodeBackup(await encodeBackup(w,'fixture-password-123'),'fixture-password-123');assert(decoded.data.session.session.examDeadlineMs===w.session.session.examDeadlineMs,'Timer changed');});
+ const incoming=emptyWorkspace();const changed=structuredClone(sample);changed.exam.title='Imported workspace';incoming.packs.push(await identifyPack(changed));incoming.preferences.theme='light';
+ await check('Repeated merge deduplicates and preserves local preferences/session',async()=>{const first=await store.restore(incoming,{mode:'merge'});const second=await store.restore(incoming,{mode:'merge'});assert(second.workspace.packs.length===first.workspace.packs.length,'Duplicate merge');assert(second.workspace.preferences.theme==='dark'&&second.workspace.session,'Merge replaced local state');});
+ w=await store.load();const before=canonical(w);
+ await check('Replace restores workspace; undo recovers previous data',async()=>{const replaced=await store.restore(incoming,{mode:'replace'});assert(replaced.workspace.packs.length===1&&!replaced.workspace.session,'Replace failed');const recovered=await store.undo();assert(canonical(recovered)===before,'Undo did not restore exact previous data');});
+ await check('Injected transaction abort leaves original workspace intact',async()=>{const put=IDBObjectStore.prototype.put;let calls=0;IDBObjectStore.prototype.put=function(...args){if(++calls===3)throw new DOMException('Injected full storage','QuotaExceededError');return put.apply(this,args);};let failed=false;try{await store.restore(incoming,{mode:'replace'});}catch{failed=true;}finally{IDBObjectStore.prototype.put=put;}assert(failed,'Abort injection did not reject');assert(canonical(await store.load())===before,'Partial restore survived abort');});
+ await check('Stale tab writes reject atomically',async()=>{second=await createWorkspaceStore({name:db,legacyStorage});const stale=await second.load();const fresh=await store.load();fresh.preferences.accent='violet';await store.save(fresh,['preferences']);stale.preferences.accent='blue';let failed=false;try{await second.save(stale,['preferences']);}catch(e){failed=/another tab/.test(e.message);}assert(failed,'Stale write accepted');assert((await store.load()).preferences.accent==='violet','New data overwritten');});
+ await check('Empty replacement never replays retained legacy data',async()=>{await store.restore(emptyWorkspace(),{mode:'replace'});const reopened=await createWorkspaceStore({name:db,legacyStorage});const clean=await reopened.load();assert(clean.packs.length===0&&clean.attempts.length===0&&!clean.session,'Legacy data resurrected');reopened.close();});
+ await check('Failed attachment saves cannot leak dangling references through later subset writes',async()=>{
+  const isolatedName=`${db}-failed-source`,isolated=await createWorkspaceStore({name:isolatedName,legacyStorage:null});
+  try{
+   const memory=await isolated.load();memory.sources.push({...source,id:'failed-source'});
+   const put=IDBObjectStore.prototype.put;let sourceFailed=false;
+   IDBObjectStore.prototype.put=function(value,key){if(key==='sources')throw new DOMException('Injected attachment quota','QuotaExceededError');return put.call(this,value,key);};
+   try{await isolated.save(memory,['sources']);}catch{sourceFailed=true;}finally{IDBObjectStore.prototype.put=put;}
+   assert(sourceFailed,'Injected source save unexpectedly succeeded');
+   const linked=structuredClone(sample);linked.questions[0].sourceBindings=[{sourceId:'failed-source'}];memory.packs.push(await identifyPack(linked,memory.packs));
+   let packRejected=false;try{await isolated.save(memory,['packs']);}catch(e){packRejected=/Unknown source reference/.test(e.message);}
+   assert(packRejected,'Pack persisted against an attachment that never committed');
+   memory.preferences.theme='light';await isolated.save(memory,['preferences']);
+   const saved=await isolated.load();assert(saved.packs.length===0&&saved.sources.length===0&&saved.preferences.theme==='light','Failed caller data contaminated committed state or blocked unrelated preferences');
+   saved.sources.push({...source,id:'caller-mutation'});
+   const independent=await isolated.load();assert(independent.sources.length===0,'Returned load exposed mutable committed cache');
+   await isolated.save(memory,['sources','packs']);memory.session={pack:memory.packs[0].pack,session:createSession(memory.packs[0].pack)};
+   const get=IDBObjectStore.prototype.get,readKeys=[];IDBObjectStore.prototype.get=function(key){readKeys.push(key);return get.call(this,key);};
+   try{await isolated.save(memory,['session']);}finally{IDBObjectStore.prototype.get=get;}
+   assert(readKeys.every(key=>key==='_revision'),'Session subset save reread unchanged attachments');
+   const retried=await isolated.load();assert(retried.sources.length===1&&retried.packs.length===1&&retried.session,'Retry did not refresh committed dependency state');
+  }finally{isolated.close();indexedDB.deleteDatabase(isolatedName);}
+ });
+ document.getElementById('summary').textContent=`PASS: ${passed} browser storage checks`;
+}catch(e){document.getElementById('summary').textContent=`FAIL after ${passed} checks: ${e.stack}`;}
+finally{store?.close();second?.close();indexedDB.deleteDatabase(db);}
+</script></html>

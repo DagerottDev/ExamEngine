@@ -57,6 +57,7 @@ export function validatePack(input) {
   const problems = [];
   if (!data || typeof data !== "object" || Array.isArray(data)) return ["Top level must be a JSON object."];
   if (data.schemaVersion !== SCHEMA_VERSION) problems.push("schemaVersion must be exactly '2.0'.");
+  if (Object.hasOwn(data, 'packId') && !nonEmpty(data.packId)) problems.push('packId must be a non-empty string.');
 
   const exam = data.exam;
   if (!exam || typeof exam !== "object" || Array.isArray(exam)) problems.push("exam must be an object.");
@@ -103,9 +104,16 @@ export function validatePack(input) {
   const questions = data.questions;
   if (!Array.isArray(questions) || questions.length === 0) return problems.concat("questions must be a non-empty array.");
   const ids = new Set();
+  const questionUids = new Set();
   questions.forEach((q, i) => {
     const w = `questions[${i}]`;
     if (!q || typeof q !== "object" || Array.isArray(q)) return problems.push(`${w} must be an object.`);
+    if (Object.hasOwn(q, 'questionUid')) {
+      if (!nonEmpty(q.questionUid)) problems.push(`${w}.questionUid must be a non-empty string.`);
+      else if (questionUids.has(q.questionUid)) problems.push(`${w}.questionUid is duplicated.`);
+      else questionUids.add(q.questionUid);
+    }
+    if (Object.hasOwn(q, 'sourceBindings') && (!Array.isArray(q.sourceBindings) || q.sourceBindings.some(binding => !binding || typeof binding !== 'object' || Array.isArray(binding) || !nonEmpty(binding.sourceId) || (Object.hasOwn(binding, 'page') && (!Number.isInteger(binding.page) || binding.page < 1)) || (Object.hasOwn(binding, 'excerpt') && typeof binding.excerpt !== 'string') || Object.keys(binding).some(key => !['sourceId', 'page', 'excerpt'].includes(key))))) problems.push(`${w}.sourceBindings is invalid.`);
     if (!Number.isInteger(q.id) || q.id < 1) problems.push(`${w}.id must be an integer >= 1.`);
     else if (ids.has(q.id)) problems.push(`${w}.id is duplicated.`);
     else ids.add(q.id);

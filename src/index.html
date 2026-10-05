@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ExamEngine v2</title>
+  <title>ExamEngine — your study workspace</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -17,8 +17,8 @@
         <div class="row"><button id="resume-btn" class="primary">Resume</button><button id="discard-resume-btn">Discard</button></div>
       </section>
 
-      <section class="card">
-        <h2>Start an exam</h2>
+      <section id="import-card" class="card">
+        <h2>Import a question pack</h2>
         <button id="drop-zone" class="drop" type="button"><strong>Drop an ExamEngine JSON pack here</strong><span>or click to browse</span></button>
         <input id="file-input" type="file" accept=".json,application/json" hidden>
         <div class="launch-grid">
@@ -53,20 +53,22 @@
     <main class="exam-shell">
       <header class="exam-header">
         <div><h1 id="exam-title"></h1><p id="exam-meta"></p></div>
-        <div class="timer-area">
-          <div id="exam-timer-wrap" class="timer"><small>EXAM</small><strong id="exam-timer" aria-live="polite">—</strong></div>
-          <div id="question-timer-wrap" class="timer"><small>QUESTION</small><strong id="question-timer" aria-live="polite">—</strong></div>
-          <button class="theme inverse" data-theme-toggle>☾ Dark</button>
+        <div id="timer-area" class="timer-area">
+          <div id="exam-timer-wrap" class="timer"><small>EXAM</small><strong id="exam-timer">—</strong></div>
+          <div id="question-timer-wrap" class="timer"><small>QUESTION</small><strong id="question-timer">—</strong></div>
+          <button id="exam-appearance-btn">Appearance</button>
         </div>
       </header>
       <p id="exam-instructions" class="instructions" hidden></p>
+      <button id="palette-toggle" aria-expanded="true">Question palette</button>
       <div class="exam-body">
-        <aside class="palette-wrap"><div id="palette"></div><div class="legend"><span><i class="answered"></i>Answered</span><span><i class="flagged"></i>Review</span><span><i class="expired"></i>Expired</span></div></aside>
+        <aside id="palette-wrap" class="palette-wrap"><div id="palette"></div><div class="legend"><span><i class="answered"></i>Answered</span><span><i class="flagged"></i>Review</span><span><i class="expired"></i>Expired</span></div></aside>
         <section class="question-panel">
-          <div class="question-top"><div><span id="question-number" class="eyebrow"></span><p id="question-topic" class="muted"></p></div><strong id="question-marks" class="pill"></strong></div>
+          <div class="question-top"><div><span id="question-number"></span><p id="question-topic" class="muted"></p></div><strong id="question-marks" class="pill"></strong></div>
           <h2 id="question-text"></h2>
           <p id="multi-note" class="hint" hidden>Select all answers that apply.</p>
           <div id="options-list" class="options"></div>
+          <label class="confidence-label">How sure are you?<select id="answer-confidence"><option value="">Not rated</option><option value="confident">Confident</option><option value="unsure">Unsure</option><option value="guessed">Guessed</option></select></label>
           <button id="check-btn" class="secondary" hidden>Check answer</button>
           <div id="study-feedback" class="feedback" hidden></div>
         </section>
@@ -78,7 +80,7 @@
   <div id="result-view" class="view" hidden>
     <main class="results shell">
       <div class="section-head"><div><h1 id="result-title"></h1><p id="result-reason" class="muted"></p></div><button class="theme" data-theme-toggle>☾ Dark</button></div>
-      <section class="score-card"><div><span id="result-percent" class="big-score"></span><strong id="result-score"></strong><p id="result-stats"></p></div><div class="row wrap"><button id="retest-btn" class="primary">Retest wrong answers</button><button id="export-adaptive-btn">Export 15-question adaptive request</button><button id="export-result-btn">Export result</button><button id="new-exam-btn">New exam</button></div></section>
+      <section class="score-card"><div><span id="result-percent" class="big-score"></span><strong id="result-score"></strong><p id="result-stats"></p></div><div class="row wrap"><button id="retest-btn" class="primary">Retest wrong answers</button><button id="export-adaptive-btn">Adaptive request options</button><button id="export-result-btn">Export result</button><button id="new-exam-btn">New exam</button></div></section>
       <section class="card"><h2>Topic performance</h2><p id="adaptive-summary" class="muted"></p><ul id="weak-topics" class="topic-list"></ul></section>
       <section class="card"><h2>Answer review</h2><div id="review-list"></div></section>
       <footer class="support-footer" aria-label="Support ExamEngine">
@@ -92,6 +94,8 @@
     </main>
   </div>
 
+  <div id="save-status" role="status" aria-live="polite"></div>
+  <div id="timer-announcement" class="sr-only" role="status" aria-live="polite"></div>
   <script id="embedded-sample" type="application/json">__SAMPLE_PACK__</script>
   <script type="module" src="./app.js"></script>
 </body>

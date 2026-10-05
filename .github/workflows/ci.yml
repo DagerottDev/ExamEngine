@@ -27,7 +27,10 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci
       - name: Core unit tests
         run: npm test
       - name: Python validator parity tests
@@ -36,6 +39,18 @@ jobs:
         run: npm run validate:sample
       - name: Build offline single-file distribution
         run: npm run build
+      - name: Verify deterministic distribution
+        run: npm run build:check
+      - name: Install headless browser
+        run: npx playwright install --with-deps chromium --only-shell
+      - name: Browser storage, workflow and offline acceptance
+        run: npm run test:browser
+      - name: Save browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-evidence
+          path: output/browser
       - name: Prepare Pages artifact
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: cp LICENSE mcq-exam-website/LICENSE

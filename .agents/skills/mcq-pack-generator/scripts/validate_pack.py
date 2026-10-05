@@ -35,6 +35,8 @@ def validate_data(data):
 
     if data.get("schemaVersion") != "2.0":
         errors.append("schemaVersion must be exactly '2.0'.")
+    if "packId" in data and not nonempty(data["packId"]):
+        errors.append("packId must be a non-empty string.")
 
     exam = data.get("exam")
     if not isinstance(exam, dict):
@@ -122,12 +124,30 @@ def validate_data(data):
         errors.append("questions must be a non-empty array.")
         questions = []
 
-    seen_ids = set()
+    seen_ids, seen_uids = set(), set()
     for i, q in enumerate(questions):
         where = f"questions[{i}]"
         if not isinstance(q, dict):
             errors.append(f"{where} must be an object.")
             continue
+
+        if "questionUid" in q:
+            if not nonempty(q["questionUid"]):
+                errors.append(f"{where}.questionUid must be a non-empty string.")
+            elif q["questionUid"] in seen_uids:
+                errors.append(f"{where}.questionUid is duplicated.")
+            else:
+                seen_uids.add(q["questionUid"])
+        if "sourceBindings" in q:
+            bindings = q["sourceBindings"]
+            if not isinstance(bindings, list) or any(
+                not isinstance(binding, dict) or not nonempty(binding.get("sourceId"))
+                or ("page" in binding and (not is_int(binding["page"]) or binding["page"] < 1))
+                or ("excerpt" in binding and not isinstance(binding["excerpt"], str))
+                or any(key not in ("sourceId", "page", "excerpt") for key in binding)
+                for binding in bindings
+            ):
+                errors.append(f"{where}.sourceBindings is invalid.")
 
         qid = q.get("id")
         if not is_int(qid) or qid < 1:

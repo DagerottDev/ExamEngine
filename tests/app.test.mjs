@@ -3,14 +3,15 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 import * as core from "../src/core/exam-engine.js";
+import {emptyWorkspace} from "../src/core/workspace.js";
 
 // Exercise the actual controller functions without starting a browser or its timers.
 const source = (await readFile(new URL("../src/app.js", import.meta.url), "utf8"))
-  .replace(/^import[\s\S]*?from "\.\/core\/exam-engine\.js";\s*/, "")
-  .split('\nsetTheme(localStorage.getItem')[0];
+  .replace(/^import[\s\S]*?from ["'][^"']+["'];\s*/gm, "")
+  .split('\nasync function initialize()')[0];
 const sample = JSON.parse(await readFile(new URL("../mcq-exam-website/sample-mcq-pack.json", import.meta.url)));
 function controller(extra = {}) {
-  const context = vm.createContext({ ...core, ...extra });
+  const context = vm.createContext({ ...core, emptyWorkspace, ...extra });
   vm.runInContext(source, context);
   return context;
 }
@@ -31,8 +32,9 @@ test("uniform retests contain only wrong/skipped questions and retain valid maxi
   const context = controller({ pack });
   vm.runInContext(`
     state.pack = pack;
+    state.session = createSession(pack, Date.now());
     state.score = { results: pack.questions.map((q, i) => ({ q, isCorrect: i > 1 })) };
-    beginNewSession = () => {};
+    startPrepared = p => { state.pack = preparePack(p); };
     retestWrong();
   `, context);
   const retest = JSON.parse(vm.runInContext("JSON.stringify(state.pack)", context));
@@ -59,18 +61,20 @@ test("manual submission respects cancellation and exports accurate result/adapti
   const downloads = [];
   let blob;
   const context = controller({
-    pack: structuredClone(sample), Blob, confirm: () => false, clearInterval() {}, setTimeout() {},
+    pack: structuredClone(sample), Blob, confirmAction: async () => false, clearInterval() {}, setTimeout() {},
     URL: { createObjectURL(value) { blob = value; return "blob:test"; } },
     document: { createElement() { return { click() { downloads.push({ name: this.download, blob }); } }; } },
   });
-  vm.runInContext(`
+  await vm.runInContext(`
     state.pack = pack; state.session = createSession(pack, Date.now());
     clearResume = saveHistory = saveNotebook = renderResults = show = () => {};
+    saveWorkspace = () => Promise.resolve();
     submitExam(false);
   `, context);
   assert.equal(vm.runInContext("state.session.submittedAt", context), null);
-  context.confirm = () => true;
-  vm.runInContext("submitExam(false); exportResult(); exportAdaptive();", context);
+  context.confirmAction = async () => true;
+  await vm.runInContext("submitExam(false)", context);
+  vm.runInContext("exportResult(); exportAdaptive();", context);
   const result = JSON.parse(await downloads[0].blob.text());
   const adaptive = JSON.parse(await downloads[1].blob.text());
   assert.ok(result.session.submittedAt > 0);
@@ -80,4 +84,14 @@ test("manual submission respects cancellation and exports accurate result/adapti
   assert.ok(downloads[0].name.endsWith("-result.json"));
   assert.equal(adaptive.count, 15);
   assert.ok(adaptive.focusTopics.length > 0);
+  // A timer may submit while a manual confirmation remains open.
+  let accept;
+  context.confirmAction = () => new Promise(resolve => { accept = resolve; });
+  context.submissions = 0;
+  vm.runInContext("state.session.submittedAt = null; saveHistory = () => submissions++;", context);
+  const pending = vm.runInContext("submitExam(false)", context);
+  await vm.runInContext("submitExam(true)", context);
+  accept(true); await pending;
+  assert.equal(context.submissions, 1);
+
 });

@@ -1,49 +1,62 @@
-# Launch verification — 2026-10-05
+# Workspace verification — 2026-10-05
 
-Tested the built single-file app in Codex's internal Chromium browser, served on an isolated `127.0.0.1:8766` origin. Fixtures and local progress were separate from the public demo. There is no backend or Docker configuration to test.
+The complete eight-area ExamEngine 2.1 implementation is present in the working tree and verified locally. This report covers the generated single-file viewer, native IndexedDB, actual download files, and a separate `file://` launch. It does not establish a GitHub push, release, or Pages deployment.
 
-## Results
-
-| Flow | Evidence |
-| --- | --- |
-| Sample pack and study mode | All nine sample questions loaded; correct-answer feedback and source references displayed. |
-| JSON upload and legacy migration | v2 uploads loaded; a legacy pack migrated to a one-minute exam with default marks. |
-| Invalid uploads | Invalid JSON, a file exceeding 5 MB, null questions, and invalid source-reference metadata showed validation errors without starting an exam. |
-| Single/multiple answers and negative marking | Weighted fixture: wrong single answer, correct multi-answer, skipped question produced **2.5/6**, with **1 correct, 1 wrong, 1 skipped**. |
-| Uniform scoring | Same pattern with four marks per correct answer and one negative mark produced **3/12**. Question labels showed the uniform scoring values. |
-| Overall timer | Expiry automatically submitted the weighted and uniform exams and showed results/review. |
-| Question timer | Three two-second question budgets advanced through the pack and automatically submitted **0/6**, three skipped. |
-| Wrong/skipped retest | Uniform retest started in untimed study mode with the two failed/skipped questions. Automated controller regression verifies its maximum is **8** and the resulting pack is valid. |
-| Persistence | Reload/resume retained the current question, answers, flags, and theme. Completed attempts appeared in local history and wrong/skipped questions in the notebook. |
-| Keyboard | Enter opened the file chooser; answer letters, arrow navigation, and the flag shortcut worked. |
-| Responsive layout | Desktop, 390×844 phone, and 768×1024 tablet inspected. Phone results and tablet exam had no document-level horizontal overflow. Question content remained in its scrollable panel. |
-| Source-link escaping | A URL containing `" data-injected="yes` remained one literal href; no `data-injected` attribute appeared. |
-| Console | No application errors in the completed browser flows. |
-
-## Fixes included
-
-- Escaped quotes at the shared HTML boundary, preventing uploaded source links from creating attributes.
-- Rejected malformed question/source metadata and unsupported schema versions without validator crashes.
-- Made Python enum/section validation return errors for list/object values rather than raising `TypeError`.
-- Included unsectioned questions in a sectioned pack's navigation palette.
-- Used uniform scoring for question labels and retest maximum marks.
-- Replaced the upload div with a native button for keyboard activation.
-
-Regression coverage uses Node/Python standard libraries; no runtime dependencies were added. Controller tests execute the actual app functions with minimal DOM/download adapters. They are not browser E2E tests.
-
-## Reproduce deterministic checks
+## Reproduce
 
 ```sh
-PYTHONDONTWRITEBYTECODE=1 npm run verify
+npm ci
+npx playwright install chromium --only-shell
+npm run verify
+npm run build
 npm run build:check
+npm run test:browser
 git diff --check
 ```
 
-Passed: **14 Node checks**, **6 Python checks** (including malformed-value subcases), sample pack validation, generated-build consistency, and diff whitespace checks.
+On Linux, install the browser with `npx playwright install --with-deps chromium --only-shell`. The runner starts a server on an ephemeral loopback port and uses fresh browser contexts. It does not open a personal browser profile. Screenshots, reports, downloaded JSON, and disposable fixtures go into ignored `output/browser/`.
 
-## Remaining verification limits
+The CI workflow runs the same browser gate before uploading/deploying the Pages artifact and retains the evidence as an artifact. The updated remote workflow has not yet been executed.
 
-- The internal browser could not reliably handle the native submit confirmation or deliver download events. Manual cancel/accept behavior and both JSON export payloads pass controller tests; actual download-to-disk and native confirmation remain browser verification gaps.
-- No external browser was launched without the user's explicit authorization. Safari, Firefox, physical touch devices, storage-denied environments, and intentionally corrupted localStorage were not tested.
-- Offline packaging has embedded script, styles, and sample data; an actual `file://` launch was unavailable in the internal browser. Hosted operation was tested separately.
-- The generator's validator was tested. New AI question generation, factual accuracy of third-party packs, and payment transactions are outside these checks.
+## Current acceptance
+
+| Area | Completed evidence |
+| --- | --- |
+| Exam baseline | Deterministic overall deadlines, non-resetting question budgets, seeded shuffling, weighted/uniform/negative marks, and exact-set multi-select tests; real study/submit/retest and timed mock workflows |
+| Library/custom mock | Saved reusable packs, question filters, deterministic balanced selection and recency exclusion checks; UI selection, count, timing, and uniform scoring |
+| Authoring/revisions | Incomplete draft save/reopen, validation/publishing, source linking, immutable revision increment, cosmetic/semantic identity tests, and retained historical snapshots |
+| Learner signals | Confidence and checked feedback survive reload; mistake edits, bookmarks/notebook, guessed/unsure/unclear scheduling, and safe dialog keyboard isolation |
+| Daily revision | Local-calendar/DST interval tests, replay idempotence/daily cap, queue-to-session launch, requested count and untimed study behavior |
+| Progress | Detailed attempts, reopening support, topic sample counts, answer time/confidence/mistake summaries, same-question first/retest comparison, and score trends restricted to matching session contexts |
+| Adaptive request | Actual JSON download with selected count/difficulty/topics/type, origin and source context, and avoided question identities; no provider request |
+| Sources | UTF-8 text and image display, two-page PDF rendering/selectable text layer/page/zoom, question excerpt display, cleanup, missing-source rejection with a recovery message, and source hash/signature/size validation |
+| Appearance/layout | Timer left/right/bottom and palette options, presets, independent fonts/reading settings, themes/accents/motion, dashboard move controls, live preview, saved preferences, and bundled-font loading |
+| Accessibility/responsiveness | Safe confirmation focus; form/dialog shortcuts do not change questions; mobile palette collapse and visible timer; no horizontal overflow at 390/768/1440 px; 200% CSS reading zoom and a 720×450 equivalent viewport; text/status/accent contrast at least 4.5:1 across light/dark and three accents |
+| Plain/encrypted backups | Actual adaptive/encrypted/plain JSON files downloaded to disk; source bytes and complete attempts included; wrong password rejected, readable preview, idempotent merge, replace confirmation, and undo |
+| Native storage | One-time legacy migration/original preservation; dirty-key saves; repeated merge; replace/undo; injected quota abort leaves previous state intact; stale writes rejected; empty replacement does not resurrect retained legacy data |
+| Failed partial saves | A failed attachment save cannot make a later packs-only save persist dangling references. Unrelated preferences can still save; retrying dependent keys together works; session writes reread only the revision, not attachments |
+| Continuity | Reload retains answer/confidence/checked state; a second tab takes ownership and the first stops presenting a writable session; timer expiry during an open confirmation cannot create duplicate submissions |
+| Storage denied | Visible temporary-mode copy, a usable temporary study session, and a complete plain backup; no claim that temporary data is durably saved |
+| Offline distribution | Actual `file://` startup, encrypted backup import into a fresh context, bundled PDF page viewing, and expired-session restore automatically submitting with its original deadline; zero HTTP(S) requests in the tested flows |
+
+The native storage harness passes **9 checks** and the workflow harness passes **15 checks**. The Node and Python checks, sample validation, build freshness, and whitespace checks pass; the final executed totals are recorded in [PROJECT_STATUS](PROJECT_STATUS.md). The runner fails on unexpected application exceptions or external network requests. Expected injected storage exceptions are explicitly scoped to their rollback tests.
+
+## Issues caught and fixed
+
+- Corrected editor mark-input constraints that rejected the default one mark; refreshed the saved-draft list when closing the editor.
+- Updated PDF cleanup to the installed PDF.js loading-task API and guarded page/render races.
+- Returned merge/replace/undo to Home so a restored session exposes Resume immediately.
+- Preserved draft edits before switching editors; guarded pending button actions and duplicate timer/manual submissions.
+- Validated partial saves against committed state, retaining atomic stale-tab rejection and avoiding attachment reads on answers.
+- Kept the legacy migration marker outside replaced public workspace data, preventing old localStorage from reappearing after an empty restore.
+- Added missing-source import validation and supported Markdown MIME backup sources.
+- Preserved draft editing and retest links across backup ID conflicts; repeated imports deduplicate renamed sources, questions, packs, attempts, drafts, and notebook entries.
+- Retained unknown timing/scoring metadata when publishing through the editor.
+
+## Verification limits
+
+- Automated browser acceptance used Playwright Chromium 153 on macOS. Interactive inspection used Codex's internal browser; an earlier native confirmation stalled its input transport, so the in-page confirmation and durable isolated runner supplied the final evidence. No personal/system browser profile was used.
+- Safari, Firefox, physical touch devices, OS screen-reader speech, and browser-chrome zoom shortcuts were not exercised. CSS zoom and reduced-viewport checks cover layout; they are not a claim of physical-device or native browser-zoom validation.
+- PDF evidence uses a two-page text fixture and an image fixture; it is not a guarantee for every PDF encoding or very large library. Limits and integrity failures also have deterministic coverage.
+- Actual iCloud/Google Drive transfers, external AI generation, and payment transactions were not performed. Backups are ordinary downloaded files for the user to place in their chosen folder.
+- No commit, push, release tag, remote CI run, or deployment was performed for this implementation. Earlier v2 launch evidence remains in Git history and is not substituted for the workspace checks above.
