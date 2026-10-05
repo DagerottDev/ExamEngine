@@ -36,6 +36,20 @@ test("validator rejects ambiguous answer definitions", () => {
   assert.ok(errors.some((x) => x.includes("exactly one")));
 });
 
+test("malformed questions and metadata are rejected without crashing", () => {
+  const p = pack();
+  p.questions = [null];
+  assert.ok(validatePack(p).some((x) => x.includes("must be an object")));
+  delete p.schemaVersion;
+  assert.ok(validatePack(upgradeLegacyPack(p)).some((x) => x.includes("must be an object")));
+  const metadata = pack();
+  metadata.questions[0].sourceRefs = "invalid";
+  assert.ok(validatePack(metadata).some((x) => x.includes("sourceRefs")));
+  const future = pack();
+  future.schemaVersion = "3.0";
+  assert.ok(validatePack(upgradeLegacyPack(future)).some((x) => x.includes("schemaVersion")));
+});
+
 test("validator rejects boolean IDs and inconsistent total marks", () => {
   const p = pack();
   p.questions[0].id = true;

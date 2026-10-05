@@ -2,12 +2,14 @@
 
 **Project:** ExamEngine  
 **Current release line:** v2  
-**Status date:** 2026-08-16  
+**Status date:** 2026-10-05
 **Default branch:** `main`  
 **v2 merge commit:** `e8ac6116330e57b953c2482815cfb027338caa73`  
-**Latest verified main CI:** ExamEngine CI run #2 (`31907554148`) — **passed**
+**CI:** [Current workflow runs](https://github.com/DagerottDev/ExamEngine/actions/workflows/ci.yml)
 
 ## Executive status
+
+The repository and included generator skill are MIT licensed and public. The free [GitHub Pages demo](https://dagerottdev.github.io/ExamEngine/) is live, with optional support links. Launch browser checks and fixes are recorded in [E2E_REPORT.md](E2E_REPORT.md), including the remaining download/native-dialog and cross-browser verification limits. Local verification now passes 14 Node checks and 6 Python checks.
 
 ExamEngine v2 is implemented, merged to `main`, and verified by CI. The v2 milestone is functionally complete for the current offline-first scope: source-grounded MCQ generation, schema validation, deterministic exam delivery, correct timer/scoring behavior, local persistence, result analytics, weak-area workflows, and a reproducible single-file browser build are all present.
 
@@ -54,7 +56,7 @@ This does **not** mean the product has reached a hosted multi-user or proctored-
 | Cross-device sync | ⬜ Not implemented | Browser data is local to a device/profile |
 | Live multi-user administration | ⬜ Not implemented | No teacher/admin backend |
 | Remote proctoring | ⬜ Not implemented | Outside current v2 scope |
-| Full browser E2E suite | ⬜ Not implemented | Core logic is tested; browser workflow coverage should be added next |
+| Browser workflow verification | ✅ Bounded manual coverage | Launch flows tested in internal Chromium; see [coverage and remaining limits](E2E_REPORT.md). No automated cross-browser E2E suite. |
 
 ## v2 milestone history
 

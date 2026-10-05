@@ -23,17 +23,19 @@ export function upgradeLegacyPack(input) {
   const pack = deepClone(input);
   if (pack?.schemaVersion === SCHEMA_VERSION) return pack;
   if (!pack || typeof pack !== "object" || Array.isArray(pack)) return pack;
+  if (pack.schemaVersion && pack.schemaVersion !== "1.0") return pack;
 
   const questions = Array.isArray(pack.questions) ? pack.questions : [];
   questions.forEach((q) => {
+    if (!q || typeof q !== "object" || Array.isArray(q)) return;
     if (!isFiniteNumber(q.marks) || q.marks <= 0) q.marks = 1;
     if (!isFiniteNumber(q.negativeMarks) || q.negativeMarks < 0) q.negativeMarks = 0;
     if (Array.isArray(q.answerIndices)) q.multiSelect = true;
   });
 
-  const calculated = questions.reduce((sum, q) => sum + (isFiniteNumber(q.marks) ? q.marks : 0), 0);
+  const calculated = questions.reduce((sum, q) => sum + (isFiniteNumber(q?.marks) ? q.marks : 0), 0);
   pack.schemaVersion = SCHEMA_VERSION;
-  pack.exam = pack.exam || {};
+  pack.exam = pack.exam && typeof pack.exam === "object" && !Array.isArray(pack.exam) ? pack.exam : {};
   pack.exam.totalMarks = calculated > 0 ? calculated : (pack.exam.totalMarks || questions.length || 1);
   pack.timing = {
     mode: "exam",
@@ -132,12 +134,15 @@ export function validatePack(input) {
     if (q.difficulty != null && !Q_DIFFICULTIES.has(q.difficulty)) problems.push(`${w}.difficulty is invalid.`);
     if (q.cognitiveLevel != null && !COGNITIVE.has(q.cognitiveLevel)) problems.push(`${w}.cognitiveLevel is invalid.`);
     if (q.confidence != null && (!isFiniteNumber(q.confidence) || q.confidence < 0 || q.confidence > 1)) problems.push(`${w}.confidence is invalid.`);
+    for (const field of ["sourceRefs", "tags"]) {
+      if (Object.prototype.hasOwnProperty.call(q, field) && (!Array.isArray(q[field]) || q[field].some((x) => !nonEmpty(x)) || new Set(q[field]).size !== q[field].length)) problems.push(`${w}.${field} must be an array of unique non-empty strings.`);
+    }
   });
 
   if (exam && isFiniteNumber(exam.totalMarks)) {
     const expected = scoring?.mode === "uniform" && isFiniteNumber(scoring.correctMarks)
       ? questions.length * scoring.correctMarks
-      : questions.reduce((sum, q) => sum + (isFiniteNumber(q.marks) ? q.marks : 0), 0);
+      : questions.reduce((sum, q) => sum + (isFiniteNumber(q?.marks) ? q.marks : 0), 0);
     if (Math.abs(expected - exam.totalMarks) > 1e-9) problems.push(`exam.totalMarks (${exam.totalMarks}) does not equal calculated maximum (${expected}).`);
   }
   return problems;

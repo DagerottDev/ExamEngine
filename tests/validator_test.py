@@ -44,6 +44,21 @@ class ValidatorParityTests(unittest.TestCase):
         errors, _ = validator.validate_data(pack)
         self.assertTrue(any("unknown section" in e for e in errors))
 
+    def test_malformed_enum_values_return_errors_instead_of_crashing(self):
+        paths = [("difficulty",), ("exam", "examType"), ("timing", "mode"),
+                 ("scoring", "mode"), ("delivery", "mode"),
+                 ("questions", 0, "difficulty"), ("questions", 0, "sectionId")]
+        for path in paths:
+            for value in ([], {}):
+                with self.subTest(path=path, value=value):
+                    pack = copy.deepcopy(self.sample)
+                    target = pack
+                    for key in path[:-1]:
+                        target = target[key]
+                    target[path[-1]] = value
+                    errors, _ = validator.validate_data(pack)
+                    self.assertTrue(errors)
+
 
 if __name__ == "__main__":
     unittest.main()

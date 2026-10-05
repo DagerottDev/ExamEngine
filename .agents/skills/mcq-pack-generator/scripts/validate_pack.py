@@ -6,13 +6,13 @@ import math
 import sys
 from pathlib import Path
 
-EXAM_TYPES = {"Quiz", "Midterm", "Final", "Mock Test", "Practice", "Other"}
-DIFFICULTIES = {"easy", "moderate", "hard", "mixed"}
-Q_DIFFICULTIES = {"easy", "moderate", "hard"}
-COGNITIVE = {"remember", "understand", "apply", "analyze", "evaluate"}
-TIMING_MODES = {"none", "exam", "question", "both"}
-SCORING_MODES = {"question", "uniform"}
-DELIVERY_MODES = {"exam", "study"}
+EXAM_TYPES = ("Quiz", "Midterm", "Final", "Mock Test", "Practice", "Other")
+DIFFICULTIES = ("easy", "moderate", "hard", "mixed")
+Q_DIFFICULTIES = ("easy", "moderate", "hard")
+COGNITIVE = ("remember", "understand", "apply", "analyze", "evaluate")
+TIMING_MODES = ("none", "exam", "question", "both")
+SCORING_MODES = ("question", "uniform")
+DELIVERY_MODES = ("exam", "study")
 
 
 def is_int(value):
@@ -61,11 +61,11 @@ def validate_data(data):
     timing_mode = timing.get("mode")
     if timing_mode not in TIMING_MODES:
         errors.append(f"timing.mode must be one of {sorted(TIMING_MODES)}.")
-    if timing_mode in {"exam", "both"}:
+    if timing_mode in ("exam", "both"):
         v = timing.get("examDurationSeconds")
         if not is_int(v) or v < 1:
             errors.append("timing.examDurationSeconds must be an integer >= 1.")
-    if timing_mode in {"question", "both"}:
+    if timing_mode in ("question", "both"):
         v = timing.get("defaultQuestionSeconds")
         if not is_int(v) or v < 1:
             errors.append("timing.defaultQuestionSeconds must be an integer >= 1.")
@@ -194,7 +194,7 @@ def validate_data(data):
             if not is_int(v) or v < 1:
                 errors.append(f"{where}.questionTimeSeconds must be an integer >= 1.")
 
-        if "sectionId" in q and q["sectionId"] not in section_ids:
+        if "sectionId" in q and (not nonempty(q["sectionId"]) or q["sectionId"] not in section_ids):
             errors.append(f"{where}.sectionId references unknown section {q['sectionId']!r}.")
 
         if "difficulty" in q and q["difficulty"] not in Q_DIFFICULTIES:

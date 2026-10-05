@@ -36,7 +36,7 @@ function download(name, value, type = "application/json") {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 function slug(text) { return String(text || "exam").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
-function esc(text) { const d = document.createElement("div"); d.textContent = text ?? ""; return d.innerHTML; }
+function esc(text) { return String(text ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;"); }
 
 function setTheme(theme) {
   document.documentElement.dataset.theme = theme;
@@ -159,7 +159,9 @@ function renderQuestion() {
   $("question-number").textContent = `Question ${idx + 1} of ${state.pack.questions.length}`;
   $("question-topic").textContent = [q.sectionId && sectionTitle(q.sectionId), q.topic, q.difficulty, q.cognitiveLevel].filter(Boolean).join(" · ");
   $("question-text").textContent = q.question;
-  $("question-marks").textContent = `${q.marks} mark${q.marks === 1 ? "" : "s"}${q.negativeMarks ? ` · −${q.negativeMarks} wrong` : ""}`;
+  const marks = state.pack.scoring.mode === "uniform" ? state.pack.scoring.correctMarks : q.marks;
+  const negativeMarks = state.pack.scoring.mode === "uniform" ? state.pack.scoring.negativeMarks : q.negativeMarks;
+  $("question-marks").textContent = `${marks} mark${marks === 1 ? "" : "s"}${negativeMarks ? ` · −${negativeMarks} wrong` : ""}`;
   const list = $("options-list"); list.innerHTML = "";
   const chosen = state.session.answers[String(q.id)];
   q.options.forEach((opt, i) => {
@@ -213,7 +215,7 @@ function sourceRefsHTML(q) {
 function renderPalette() {
   const root = $("palette"); root.innerHTML = "";
   const groups = state.pack.sections?.length ? state.pack.sections.map((s) => ({ id: s.id, title: s.title, qs: state.pack.questions.filter((q) => q.sectionId === s.id) })) : [{ id: "all", title: "Questions", qs: state.pack.questions }];
-  const unsectioned = state.pack.questions.filter((q) => q.sectionId && !state.pack.sections?.some((s) => s.id === q.sectionId));
+  const unsectioned = state.pack.sections?.length ? state.pack.questions.filter((q) => !q.sectionId) : [];
   if (unsectioned.length) groups.push({ id: "other", title: "Other", qs: unsectioned });
   groups.forEach((g) => {
     const h = document.createElement("h4"); h.textContent = g.title; root.appendChild(h);
@@ -319,7 +321,7 @@ function retestWrong() {
   const wrongIds = new Set(state.score.results.filter((r) => !r.isCorrect).map((r) => r.q.id));
   if (!wrongIds.size) return alert("There are no wrong or skipped questions to retest.");
   const p = deepClone(state.pack); p.questions = p.questions.filter((q) => wrongIds.has(q.id));
-  p.exam = { ...p.exam, title: `${p.exam.title} — Wrong Answer Retest`, totalMarks: p.questions.reduce((s, q) => s + q.marks, 0) };
+  p.exam = { ...p.exam, title: `${p.exam.title} — Wrong Answer Retest`, totalMarks: p.scoring.mode === "uniform" ? p.questions.length * p.scoring.correctMarks : p.questions.reduce((s, q) => s + q.marks, 0) };
   p.delivery = { ...p.delivery, mode: "study", shuffleQuestions: true };
   p.timing = { mode: "none" };
   state.pack = preparePack(p); beginNewSession();
