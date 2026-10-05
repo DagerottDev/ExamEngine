@@ -14,7 +14,7 @@
 
 ## Current state
 
-The repository has a working-tree study-workspace implementation on top of the previously merged v2 exam baseline. It remains a free, MIT-licensed, static local-first product with the existing [Pages address](https://dagerottdev.github.io/ExamEngine/) and optional support links. The new workspace must not be described as released, deployed, or fully browser-accepted solely because its source and deterministic tests exist.
+ExamEngine 2.1 is pushed to `main` and deployed at the [Pages address](https://dagerottdev.github.io/ExamEngine/). Application commit `b8e7fb879db28841e4a3e6573966bda267d78245` passed the [verification and deployment workflow](https://github.com/DagerottDev/ExamEngine/actions/runs/37350864402). The public HTML returned HTTP 200 and matched the tested local distribution byte-for-byte (4,906,210 bytes; SHA-256 `cb467b17dc9b242e4b3cd53957a11711a27f7d527e4e5b05d47b3713d1d422d8`). It remains a free, MIT-licensed, static local-first product with optional support links.
 
 The complete eight-area scope remains required. Current code exposes all eight areas; completed browser acceptance and remaining platform limits are tracked in [E2E_REPORT](E2E_REPORT.md). That report is the authority for actual browsers, fixtures, downloads, and verification limits. Earlier v2 launch evidence does not automatically cover v2.1 workspace behavior.
 
@@ -34,13 +34,14 @@ git diff --check
 
 Browser checks use isolated contexts and an ephemeral test origin. Generated screenshots and files are under ignored `output/browser/`. The CI workflow now runs the browser gate before Pages publication and uploads its evidence.
 
-## Remaining publication and platform work
+## Remaining platform work
 
-1. Commit/push the reviewed working-tree change, run remote CI, and verify the published Pages revision when publication is requested.
-2. Broaden the verified browser matrix beyond Chromium to Safari/Firefox and physical touch devices; OS screen-reader speech and native browser-chrome zoom remain untested.
-3. Benchmark larger libraries and additional PDF encodings when those real workloads are available. Current fixtures and limits are described in the acceptance report.
+1. Broaden the verified browser matrix beyond Chromium to Safari/Firefox and physical touch devices; OS screen-reader speech and native browser-chrome zoom remain untested.
+2. Benchmark larger libraries and additional PDF encodings when those real workloads are available. Current fixtures and limits are described in the acceptance report.
 
-These are publication/platform follow-ups; the complete local eight-area implementation is not narrowed to them. No remote release or deployment is claimed.
+These are platform follow-ups; the complete eight-area implementation is deployed. The refreshed README, badges, screenshot, and documentation anchors were checked in the GitHub-rendered page.
+
+The authorized release updates were published and verified on [Reddit in r/SideProject](https://www.reddit.com/r/SideProject/comments/1wyf9co/examengine_21_update_encrypted_backups_a_pack/) and [X](https://x.com/Rajveer761SM/status/2107166574767648993). This status update is documentation only; the deployed application revision remains the commit recorded above.
 
 ## Preserved boundaries
 
