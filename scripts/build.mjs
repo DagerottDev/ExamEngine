@@ -3,12 +3,13 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const [template, styles, coreSource, appSource, sampleRaw] = await Promise.all([
+const [template, styles, coreSource, appSource, sampleRaw, license] = await Promise.all([
   readFile(path.join(root, "src/index.html"), "utf8"),
   readFile(path.join(root, "src/styles.css"), "utf8"),
   readFile(path.join(root, "src/core/exam-engine.js"), "utf8"),
   readFile(path.join(root, "src/app.js"), "utf8"),
   readFile(path.join(root, "mcq-exam-website/sample-mcq-pack.json"), "utf8"),
+  readFile(path.join(root, "LICENSE"), "utf8"),
 ]);
 
 const core = coreSource.replace(/\bexport\s+/g, "");
@@ -16,6 +17,7 @@ const app = appSource.replace(/import\s*\{[\s\S]*?\}\s*from\s*["']\.\/core\/exam
 const sample = JSON.stringify(JSON.parse(sampleRaw)).replace(/<\/script/gi, "<\\/script");
 
 let output = template
+  .replace("<!doctype html>", `<!doctype html>\n<!--\n${license.trim()}\n-->`)
   .replace('<link rel="stylesheet" href="./styles.css">', `<style>\n${styles}\n</style>`)
   .replace("__SAMPLE_PACK__", sample)
   .replace('<script type="module" src="./app.js"></script>', `<script type="module">\n${core}\n${app}\n</script>`);

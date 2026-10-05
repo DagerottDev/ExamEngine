@@ -10,6 +10,7 @@
   <p>An offline-first MCQ exam and adaptive-study engine that runs in a single HTML file.</p>
   <p>
     <a href="docs/ARCHITECTURE.md">Explore the docs</a>
+    · <a href="https://dagerottdev.github.io/ExamEngine/">Open ExamEngine</a>
     · <a href="https://github.com/DagerottDev/ExamEngine/issues">Report a bug</a>
     · <a href="https://github.com/DagerottDev/ExamEngine/issues">Request a feature</a>
   </p>
@@ -36,9 +37,11 @@
     </li>
     <li><a href="#local-data-and-assessment-boundaries">Local Data and Assessment Boundaries</a></li>
     <li><a href="#development">Development</a></li>
+    <li><a href="#free-hosting">Free Hosting</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
+    <li><a href="#support-the-project">Support the Project</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ul>
@@ -76,6 +79,10 @@ There are no declared npm dependencies and no backend service requirement.
 ## Getting Started
 
 The repository includes a ready-to-open [offline viewer](mcq-exam-website/index.html) and a [nine-question Cell Biology sample pack](mcq-exam-website/sample-mcq-pack.json). Node.js and Python are needed only for development or CLI validation.
+
+Use [ExamEngine online](https://dagerottdev.github.io/ExamEngine/) or save the
+[self-contained HTML](https://dagerottdev.github.io/ExamEngine/index.html) to your
+device for offline use. Hosting is free; no login or payment is required.
 
 ### Prerequisites
 
@@ -128,6 +135,19 @@ Keyboard shortcuts during a session: **← / →** navigate, **F** marks for rev
 ### Create and Validate a Pack
 
 Open the repository in your agent environment and invoke the [mcq-pack-generator skill](.agents/skills/mcq-pack-generator/SKILL.md). Supply the exact question count, source material, and, when available, two to five representative target-exam questions. Include timing and scoring preferences if needed.
+
+The generator skill is open source under the same MIT license as the app.
+In Codex, open the repository and invoke `$mcq-pack-generator`; in another
+compatible agent, load its `SKILL.md` using that tool's skill mechanism.
+To reuse it in another project, copy the **entire**
+`.agents/skills/mcq-pack-generator/` directory, including `LICENSE`, `scripts/`,
+`resources/`, and `examples/`. For a copy installed elsewhere, validate with
+`python3 <skill-folder>/scripts/validate_pack.py <pack.json>`.
+
+Generation runs in your own AI tool, separately from the free website. Any AI
+provider charges depend on your tool and account. You can also author packs
+manually using the schema; the skill is not required to load a valid JSON pack.
+Only publish question packs and reference material you have permission to share.
 
 The skill maps sources, calibrates difficulty, plans coverage, generates questions, and checks grounding, distractors, duplicates, answer-position balance, metadata, and marks consistency before validation. Without a sample paper, it uses moderate difficulty and reports that the difficulty was inferred. Its default output directory is `mcq-packs/`.
 
@@ -197,7 +217,12 @@ Use the [canonical schema](schema/mcq-pack.v2.schema.json) and [complete sample 
 
 Sessions, attempt history, theme preference, and the wrong-answer notebook are stored in browser `localStorage`. ExamEngine does not upload these records to a server. History retains up to 100 attempts and the notebook up to 500 entries; the landing page displays the ten most recent attempts and twenty most recent notebook entries.
 
-Data belongs to the browser profile and origin. It does not automatically follow you across devices, profiles, or between a local file and a locally served URL. Clearing browser storage removes saved sessions and history. Export results you want to keep.
+Data belongs to the browser profile and origin. It does not automatically follow you across devices, profiles, or between the hosted site, a local file, and a locally served URL. Clearing browser storage removes saved sessions and history. Export results you want to keep.
+
+The hosted page requires a connection to load; the downloaded HTML can run
+offline. GitHub's hosting service may collect access logs, and selecting source
+or support links opens an external site. ExamEngine itself does not upload packs
+or attempts to GitHub or payment providers.
 
 This is a personal-study tool with answers included in its JSON packs. It has no account system, remote proctoring, or server-side assessment integrity controls. Source links in packs may open external pages when selected.
 
@@ -238,6 +263,42 @@ Edit the modular files in `src/`, then build; direct changes to the generated vi
 
 The [CI workflow](.github/workflows/ci.yml) runs core tests, validator tests, sample validation, and the build on pull requests and pushes to `main` or `goal/**`. On successful push runs, it commits and pushes the regenerated viewer if the output changed. Current automated coverage targets core logic and validation; comprehensive browser E2E coverage remains a roadmap item.
 
+After verification, pushes to `main` also deploy the built viewer to GitHub Pages.
+Pull requests and `goal/**` branches do not deploy. A manual workflow run on
+`main` can redeploy the current version.
+
+<p align="right"><a href="#readme-top">Back to top</a></p>
+
+## Free Hosting
+
+ExamEngine uses static GitHub Pages hosting at
+[dagerottdev.github.io/ExamEngine](https://dagerottdev.github.io/ExamEngine/).
+The app needs no server, database, or paid hosting subscription.
+
+To host your own fork:
+
+1. Create a public repository on GitHub. GitHub Pages supports public repositories
+   on GitHub Free.
+2. Open **Settings → Pages → Build and deployment → Source** and select
+   **GitHub Actions**.
+3. Push a change to `main`, or run **Actions → ExamEngine CI → Run workflow**
+   on `main`. Tests and validation must pass before deployment.
+4. Find your site URL in **Settings → Pages** or the workflow's `github-pages`
+   deployment. A project site normally uses `https://<owner>.github.io/<repo>/`.
+5. Update this README and the source/support links for your fork, retaining the
+   MIT notices. Run `npm run build` after changing source files.
+
+CI publishes only `mcq-exam-website/`, including the viewer, sample JSON, and a
+license copy. The generator is shared through the source repository and runs in
+users' own AI tools.
+
+Use the supplied `github.io` address to keep hosting at **₹0**. A purchased
+domain, AI generation, and payment-provider fees are separate optional costs.
+GitHub Pages has usage limits and is not intended for paid SaaS or sites primarily
+focused on commercial transactions; this app stays free with optional external
+support links. See [GitHub Pages availability](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)
+and [usage limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits).
+
 <p align="right"><a href="#readme-top">Back to top</a></p>
 
 ## Roadmap
@@ -256,13 +317,30 @@ Discuss bugs and proposed changes through [repository issues][issues-url] or a p
 
 ## License
 
-No license file is present in this repository. Repository visibility alone does not grant permission to reuse or redistribute the code.
+Distributed under the [MIT License](LICENSE). This covers the app, documentation,
+schemas, and author-owned generator skill and examples. The skill includes its
+own license copy, and the generated HTML embeds the full notice for offline reuse.
+Third-party source books, papers, and user-supplied material retain their own rights.
+
+<p align="right"><a href="#readme-top">Back to top</a></p>
+
+## Support the Project
+
+ExamEngine is free to use. If it helps your study sessions, you can support its
+development:
+
+- [Buy me a coffee](https://buymeacoffee.com/dagerottdev) — international support.
+- [Buy me a chai on Bondin](https://bondin.io/dagerottdev) — support from India.
+
+Support is optional. Payments are handled on the providers' websites; their fees
+and terms apply. Bug reports, contributions, and documentation improvements are
+welcome too.
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
 
 ## Contact
 
-Use the [ExamEngine repository][repository-url] and [issue tracker][issues-url] for project support. Access to repository links requires repository permission.
+Use the [ExamEngine repository][repository-url] and [issue tracker][issues-url] for project support.
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
 

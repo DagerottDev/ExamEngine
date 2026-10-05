@@ -1,4 +1,27 @@
 <!doctype html>
+<!--
+MIT License
+
+Copyright (c) 2026 Rajveer Sharma
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -6,6 +29,7 @@
   <title>ExamEngine v2</title>
   <style>
 :root{--bg:#eef2f7;--panel:#fff;--panel2:#f7f9fc;--ink:#172033;--muted:#677286;--line:#d8e0ea;--brand:#0d4f94;--brand2:#0a3d73;--good:#1f8a4c;--bad:#bf3d35;--warn:#b87908;--shadow:0 16px 45px rgba(25,42,70,.13)}[data-theme="dark"]{--bg:#11161e;--panel:#1c2430;--panel2:#151b24;--ink:#eef3f8;--muted:#9facbd;--line:#334051;--brand:#4c8ed9;--brand2:#2767ad;--good:#65c98b;--bad:#ee7c72;--warn:#e4aa4c;--shadow:0 16px 45px rgba(0,0,0,.4)}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}.view{min-height:100vh}.shell{width:min(1100px,calc(100% - 32px));margin:auto;padding:28px 0 48px}.landing{position:relative}.brand{display:flex;gap:16px;align-items:center;margin:12px 0 24px}.brand>span{width:60px;height:60px;border-radius:16px;display:grid;place-items:center;background:var(--brand);color:#fff;font-size:22px;font-weight:800}.brand h1,.brand p{margin:0}.theme{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:8px 12px;cursor:pointer}.landing>.theme{position:absolute;right:0;top:28px}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;margin:16px 0;box-shadow:var(--shadow)}.card h2{margin:0 0 12px}.resume{display:flex;align-items:center;justify-content:space-between;gap:18px}.resume p{margin:3px 0 0}.drop{border:2px dashed var(--line);background:var(--panel2);padding:30px;border-radius:14px;text-align:center;cursor:pointer;display:grid;gap:5px}.drop:hover,.drop:focus{border-color:var(--brand);outline:none}.launch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}.launch-grid label{display:grid;gap:6px;font-weight:600}.launch-grid input,.launch-grid select{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink)}.launch-grid .check{display:flex;align-items:center;gap:8px;font-weight:500}.launch-grid .check input{width:auto}.row{display:flex;gap:10px;align-items:center}.wrap{flex-wrap:wrap}button{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:9px;padding:9px 14px;cursor:pointer}button:hover:not(:disabled){border-color:var(--brand)}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--brand);color:#fff;border-color:var(--brand)}.secondary{color:var(--brand);border-color:var(--brand)}.danger-btn{background:#a62e28;color:#fff;border-color:#a62e28}.muted{color:var(--muted)}.error{white-space:pre-wrap;background:color-mix(in srgb,var(--bad) 12%,var(--panel));color:var(--bad);border:1px solid color-mix(in srgb,var(--bad) 35%,var(--line));padding:12px;border-radius:10px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}th{font-size:12px;text-transform:uppercase;color:var(--muted)}.pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);padding:3px 9px;border-radius:999px;font-size:12px}.notebook summary{cursor:pointer;font-weight:700}.notebook li{margin:9px 0}.notebook small{display:block;color:var(--muted)}.exam-view{height:100vh;overflow:hidden}.exam-shell{height:100vh;display:flex;flex-direction:column;background:var(--panel)}.exam-header{background:linear-gradient(180deg,#1761b1,#0b3e79);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 22px}.exam-header h1,.exam-header p{margin:0}.exam-header p{color:#cddcf0}.timer-area{display:flex;gap:10px;align-items:center}.timer{min-width:88px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.35);border-radius:9px;padding:6px 10px;text-align:right}.timer small{display:block;font-size:9px;letter-spacing:1px;color:#cddcf0}.timer strong{font:700 20px ui-monospace,SFMono-Regular,Menlo,monospace}.timer .danger{color:#ffd3ce;animation:pulse 1s infinite}.inverse{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}@keyframes pulse{50%{opacity:.5}}.instructions{margin:0;padding:9px 22px;background:var(--panel2);border-bottom:1px solid var(--line);color:var(--muted)}.exam-body{flex:1;display:flex;min-height:0}.palette-wrap{width:230px;overflow:auto;padding:16px;background:var(--panel2);border-right:1px solid var(--line)}#palette h4{margin:13px 0 7px;font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.8px}.palette-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.palette-grid button{padding:0;aspect-ratio:1;border-radius:8px}.palette-grid button.current{outline:2px solid var(--brand);outline-offset:1px}.palette-grid button.answered{background:color-mix(in srgb,var(--good) 18%,var(--panel));border-color:var(--good)}.palette-grid button.flagged{box-shadow:inset 0 -4px var(--warn)}.palette-grid button.expired{opacity:.5;text-decoration:line-through}.legend{margin-top:18px;display:grid;gap:7px;font-size:11px;color:var(--muted)}.legend span{display:flex;align-items:center;gap:7px}.legend i{width:11px;height:11px;border:1px solid var(--line);border-radius:3px}.legend i.answered{background:color-mix(in srgb,var(--good) 25%,var(--panel))}.legend i.flagged{background:var(--warn)}.legend i.expired{background:var(--muted)}.question-panel{flex:1;overflow:auto;padding:32px clamp(22px,5vw,70px)}.question-top{display:flex;justify-content:space-between;gap:15px}.question-top p{margin:3px 0 0}.eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;color:var(--brand);letter-spacing:.7px}#question-text{font-size:22px;line-height:1.45;margin:22px 0}.hint{padding:8px 10px;background:color-mix(in srgb,var(--brand) 12%,var(--panel));border-radius:8px;color:var(--brand)}.options{display:grid;gap:10px}.option{display:flex;text-align:left;align-items:flex-start;gap:12px;padding:13px 14px}.option.selected{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 12%,var(--panel));box-shadow:0 0 0 2px color-mix(in srgb,var(--brand) 25%,transparent)}.badge{width:27px;height:27px;display:grid;place-items:center;flex:0 0 27px;border:1px solid var(--line);border-radius:50%;font-weight:800}.option.selected .badge{background:var(--brand);border-color:var(--brand);color:#fff}.feedback{margin-top:18px;padding:15px;border-radius:10px;border:1px solid var(--line)}.feedback.correct{border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,var(--panel))}.feedback.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--panel))}.feedback p{margin:8px 0}.source-refs{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.source-refs span,.source-refs a{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:4px 8px;color:var(--brand);text-decoration:none}.toolbar{display:flex;justify-content:space-between;gap:12px;padding:12px 18px;border-top:1px solid var(--line);background:var(--panel2)}.results .score-card{background:linear-gradient(135deg,var(--brand2),var(--brand));color:#fff;border-radius:18px;padding:24px;display:flex;align-items:center;justify-content:space-between;gap:22px}.big-score{font-size:52px;font-weight:800;display:block}.score-card strong{font-size:20px}.score-card p{margin:5px 0}.score-card button{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.45);color:#fff}.topic-list{list-style:none;padding:0}.topic-list li{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}.review{border:1px solid var(--line);border-left:5px solid var(--line);border-radius:11px;padding:15px;margin:12px 0}.review.correct{border-left-color:var(--good)}.review.wrong{border-left-color:var(--bad)}.review.skipped{border-left-color:var(--warn)}.review header{display:flex;justify-content:space-between;gap:14px}.review p{margin:8px 0}.review .explanation{color:var(--muted)}@media(max-width:850px){.launch-grid{grid-template-columns:1fr 1fr}.exam-header{align-items:flex-start;flex-direction:column}.timer-area{width:100%;flex-wrap:wrap}.exam-body{flex-direction:column}.palette-wrap{width:100%;max-height:170px;border-right:0;border-bottom:1px solid var(--line)}.palette-grid{grid-template-columns:repeat(10,1fr)}.toolbar{flex-direction:column}.score-card{flex-direction:column;align-items:flex-start!important}}@media(max-width:560px){.launch-grid{grid-template-columns:1fr}.resume,.section-head{align-items:flex-start;flex-direction:column}.palette-grid{grid-template-columns:repeat(6,1fr)}.question-panel{padding:22px 16px}.exam-header{padding:12px 14px}.toolbar .row{display:grid;grid-template-columns:1fr 1fr}.toolbar #next-btn{grid-column:span 2}.landing>.theme{position:static;float:right}}
+:is(.landing,.results) .support-footer{margin-top:32px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink);font-size:14px}.support-footer p{margin:0 0 8px}.support-footer nav{display:flex;flex-wrap:wrap;gap:8px 20px;margin-bottom:8px}.support-footer a{display:inline-flex;align-items:center;min-height:44px;color:var(--brand);text-underline-offset:3px}.support-footer a:hover{text-decoration-thickness:2px}.support-footer a:focus-visible{outline:2px solid var(--brand);outline-offset:4px;border-radius:2px}
 
 </style>
 </head>
@@ -41,6 +65,14 @@
       </section>
 
       <details class="card notebook"><summary>Wrong-answer notebook <span id="notebook-count" class="pill">0</span></summary><ul id="notebook-list"></ul></details>
+      <footer class="support-footer" aria-label="Support ExamEngine">
+        <p>ExamEngine is free and open source. Support is optional.</p>
+        <nav aria-label="Project and support links">
+          <a href="https://github.com/DagerottDev/ExamEngine" target="_blank" rel="noopener noreferrer">Source and generator skill</a>
+          <a href="https://buymeacoffee.com/dagerottdev" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
+          <a href="https://bondin.io/dagerottdev" target="_blank" rel="noopener noreferrer">Buy me a chai</a>
+        </nav>
+      </footer>
     </main>
   </div>
 
@@ -76,6 +108,14 @@
       <section class="score-card"><div><span id="result-percent" class="big-score"></span><strong id="result-score"></strong><p id="result-stats"></p></div><div class="row wrap"><button id="retest-btn" class="primary">Retest wrong answers</button><button id="export-adaptive-btn">Export 15-question adaptive request</button><button id="export-result-btn">Export result</button><button id="new-exam-btn">New exam</button></div></section>
       <section class="card"><h2>Topic performance</h2><p id="adaptive-summary" class="muted"></p><ul id="weak-topics" class="topic-list"></ul></section>
       <section class="card"><h2>Answer review</h2><div id="review-list"></div></section>
+      <footer class="support-footer" aria-label="Support ExamEngine">
+        <p>Enjoyed your study session? Support ExamEngine's development.</p>
+        <nav aria-label="Support links">
+          <a href="https://buymeacoffee.com/dagerottdev" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
+          <a href="https://bondin.io/dagerottdev" target="_blank" rel="noopener noreferrer">Buy me a chai</a>
+        </nav>
+        <p>Support is optional. Payments are handled on the provider's website.</p>
+      </footer>
     </main>
   </div>
 

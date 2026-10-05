@@ -1,6 +1,7 @@
 ---
 name: mcq-pack-generator
 description: Generates ExamEngine v2 MCQ packs from reference material and sample exam questions, with source grounding, calibrated difficulty, validation, and QA.
+license: MIT
 ---
 
 # MCQ Pack Generator — ExamEngine v2
@@ -168,3 +169,13 @@ ExamEngine can export `adaptive-retest-request` JSON after a completed exam. Whe
 ## Compatibility
 
 Generate schema v2 only. The browser can migrate old v1 packs for use, but newly generated packs must include `schemaVersion: "2.0"`.
+
+## Reuse and licensing
+
+This skill, its validator, schema, and author-owned examples are MIT licensed;
+keep the included `LICENSE` when copying the entire skill folder. When running
+outside the repository, use `python3 <skill-folder>/scripts/validate_pack.py <pack.json>`.
+Run the skill in your own compatible AI agent; the ExamEngine website does not
+host AI generation. AI service charges depend on the tool/provider you use.
+Use only reference material you have permission to use and share; this license
+does not grant rights to third-party books, papers, or uploaded sources.
