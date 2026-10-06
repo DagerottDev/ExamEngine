@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { decodeBackup, encodeBackup } from '../src/core/backup.js';
 import { preparePack, createSession } from '../src/core/exam-engine.js';
+import { checkUsageAnalytics } from '../tests/browser-analytics.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=path.join(root,'output/browser');await mkdir(output,{recursive:true});
 const mime={'.html':'text/html','.js':'text/javascript','.json':'application/json','.css':'text/css'};
@@ -14,6 +15,7 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const base=`http://127.0.0.1:${server.address().port}`;let browser,backupPath;
 try{
  browser=await chromium.launch({headless:true});
+ await checkUsageAnalytics(browser, await readFile(path.join(root,'mcq-exam-website/index.html'),'utf8'), output);
  for(const [file,label]of[['browser-harness.html','storage'],['browser-ui.html','workflows']]){
   const context=await browser.newContext({viewport:{width:1500,height:1050},acceptDownloads:true});const page=await context.newPage();const errors=[],downloads=[],external=[];
   page.on('pageerror',e=>{if(label==='storage'&&/Injected (full storage|attachment quota)/.test(e.message))return;errors.push(e.message);});

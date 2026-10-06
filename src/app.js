@@ -6,6 +6,7 @@ import {
 import { createWorkspaceStore, emptyWorkspace, identifyPack, scheduleReview } from "./core/workspace.js";
 import { confirmAction } from "./core/confirm.js";
 import { createWorkspaceUI } from "./workspace-ui.js";
+import { track, usageAnalytics, initializeAnalyticsControls } from "./core/usage-analytics.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -42,6 +43,7 @@ function snapshotSession() {
 function show(id) {
   ["landing-view", "exam-view", "result-view"].forEach((x) => $(x).hidden = x !== id);
   window.scrollTo(0, 0);
+  usageAnalytics.viewScreen(id === "exam-view" ? "exam" : id === "result-view" ? "results" : workspaceUI?.currentScreen() || "home");
 }
 function formatTime(ms) {
   if (ms == null) return "—";
@@ -124,8 +126,10 @@ async function loadPack(raw, sourceLabel = "pack", quickStart = false) {
   if (upgraded.questions.some(question => question.sourceBindings?.some(binding => !sources.has(binding.sourceId)))) return showErrors(["Missing local source files. Import the full workspace backup containing them, or remove the local source links from this pack."]);
   try {
     const record = await identifyPack(upgraded, workspace.packs);
-    if (!workspace.packs.some(p => p.id === record.id)) workspace.packs.push(record);
+    const deduplicated = workspace.packs.some(p => p.id === record.id);
+    if (!deduplicated) workspace.packs.push(record);
     await saveWorkspace(["packs"]);
+    track("pack_imported", {source: quickStart ? "sample" : "file", result: deduplicated ? "deduplicated" : "added"});
     $("migration-note").textContent = `${wasLegacy ? "Upgraded legacy pack. " : ""}${store?"Saved":"Temporarily added"} ${sourceLabel} to your library.`;
     workspaceUI?.render();
     if (quickStart) await startRecord(record);
@@ -162,6 +166,7 @@ async function beginNewSession(metadata = {}) {
   workspaceUI?.applyPreferences();
   state.timerId = setInterval(onTick, 250);
   show("exam-view");
+  track("session_started", {kind: state.session.kind || state.pack.delivery.mode, question_count: state.pack.questions.length});
 }
 
 async function resumeSession() {
@@ -179,6 +184,7 @@ async function resumeSession() {
   workspaceUI?.applyPreferences();
   state.timerId = setInterval(onTick, 250);
   show("exam-view");
+  track("session_resumed", {kind: state.session.kind || state.pack.delivery.mode});
   onTick();
 }
 
@@ -329,8 +335,11 @@ async function submitExam(auto = false, reason = "") {
   state.score = scoreExam(state.pack, state.session);
   state.analytics = buildAnalytics(state.score);
   clearResume(); saveHistory(); saveNotebook();
-  saveWorkspace(["session","attempts","review","notebook"]).catch(() => {});
+  const completedKind = state.session.kind || state.pack.delivery.mode;
+  const saved = saveWorkspace(["session","attempts","review","notebook"]);
   renderResults(reason); show("result-view");
+  try { await saved; } catch { return; }
+  track("session_completed", {kind: completedKind, submission: auto ? "timer" : "manual"});
 }
 
 function saveHistory() {
@@ -453,6 +462,7 @@ async function initialize() {
   workspaceUI = createWorkspaceUI({state,getWorkspace:()=>workspace,setWorkspace:w=>workspace=w,save:saveWorkspace,notify,startRecord,startPrepared,snapshotSession,download,esc,store:()=>store,openAttempt:()=>{renderResults();show("result-view");},showHome:()=>{renderResume();renderHistory();renderNotebook();show("landing-view");}});
   wire(); workspaceUI.wire(); workspaceUI.applyPreferences(); workspaceUI.render();
   renderResume(); renderHistory(); renderNotebook(); show("landing-view");
+  initializeAnalyticsControls();
   if (workspace.meta.migrationWarning) notify(workspace.meta.migrationWarning + ". Original browser data was retained.", true);
   if (globalThis.BroadcastChannel) {
     channel = new BroadcastChannel("exam-engine-workspace");

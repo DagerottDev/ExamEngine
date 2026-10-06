@@ -82,7 +82,7 @@ Supported source types are UTF-8 text/Markdown, PNG/JPEG/WebP, and PDF. Limits a
 
 Local sources use Blob URLs. Text is rendered as text, images as images, and PDFs through bundled PDF.js with page controls, zoom, and a selectable text layer. Render cancellation and URL/document cleanup handle page changes and closing. A signature check is not a full document-content audit; PDF compatibility and offline/runtime behavior must be tested in the browser.
 
-The build bundles JavaScript through esbuild and embeds PDF.js's worker, four fonts, styles, and sample data. It also embeds the app's MIT notice, PDF.js's Apache-2.0 notice, and font OFL notices. The raw source HTML has bare package imports and is not the standalone browser entry point. Use the generated viewer for local browser testing. External source/project/support links require the network when opened; no automatic cloud transfer is implemented.
+The build bundles JavaScript through esbuild and embeds PDF.js's worker, four fonts, styles, and sample data. It also embeds the app's MIT notice, PDF.js's Apache-2.0 notice, and font OFL notices. The raw source HTML has bare package imports and is not the standalone browser entry point. Use the generated viewer for local browser testing. External source/project/support links require the network when opened; optional consent-based usage events go to PostHog US only on the configured production URL. Study content stays local. Analytics consent and the random browser identifier use separate localStorage keys outside workspace backup/restore/undo. See [the privacy contract](../README.md#optional-usage-analytics).
 
 ## Backup and restore
 

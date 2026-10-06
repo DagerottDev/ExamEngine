@@ -4,6 +4,7 @@ import { encodeBackup, decodeBackup, backupPreview, validateSource } from "./cor
 import * as pdfjs from "pdfjs-dist/build/pdf.mjs";
 import { confirmAction } from "./core/confirm.js";
 import { DEFAULT_PREFERENCES, normalizePreferences } from "./core/preferences.js";
+import { track } from "./core/usage-analytics.js";
 const FONTS = { system: "system-ui, sans-serif", source: '"Source Sans 3", sans-serif', lexend: "Lexend, sans-serif", atkinson: '"Atkinson Hyperlegible", sans-serif', lora: "Lora, serif" };
 const $ = (id) => document.getElementById(id);
 const uid = () => crypto.randomUUID();
@@ -177,6 +178,7 @@ function createWorkspaceUI(api) {
       await save(["preferences"]);
       applyPreferences();
       $("appearance-dialog").close();
+      track("appearance_applied", {preset: ws().preferences.layout});
     });
     $("appearance-dialog").addEventListener("close", () => applyPreferences());
     $("reset-layout").onclick = () => {
@@ -196,6 +198,7 @@ function createWorkspaceUI(api) {
       await saveQueueReady();
       const backup = await encodeBackup(deepClone(ws()), password);
       download(`examengine-backup-${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10)}.json`, backup);
+      track("backup_exported", {encrypted: Boolean(password)});
       $("backup-password").value = $("backup-confirm").value = "";
       notify("Backup downloaded. Save it to your chosen drive or folder.");
     });
@@ -516,6 +519,7 @@ function createWorkspaceUI(api) {
       $("editor-panel").hidden = true;
       render();
       notify(api.store() ? "Pack published to your library." : "Pack added to temporary library. Download a backup before closing.", !api.store());
+      track("pack_published", {question_count: record.pack.questions.length});
     });
     $("draft-export").onclick = guarded(() => {
       readEditor();
@@ -781,6 +785,7 @@ function createWorkspaceUI(api) {
     applyPreferences();
     navigate("home");
     notify(`Backup ${mode === "merge" ? "merged" : "restored"}: ${result.report.added} records added, ${result.report.skipped} duplicates skipped, ${result.report.conflicts.length} conflicts preserved.`);
+    track("backup_restored", {mode});
   }
   function openAdaptive(pack, analytics) {
     $("adaptive-topics").value = analytics.weakTopics.join("\n");
@@ -802,7 +807,7 @@ function createWorkspaceUI(api) {
     });
     return true;
   }
-  return { wire, render, navigate, applyPreferences, openAppearance, openAdaptive };
+  return { wire, render, navigate, applyPreferences, openAppearance, openAdaptive, currentScreen: () => section };
 }
 export {
   createWorkspaceUI

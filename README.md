@@ -42,6 +42,7 @@
       </ul>
     </li>
     <li><a href="#local-data-and-assessment-boundaries">Local Data and Assessment Boundaries</a></li>
+    <li><a href="#optional-usage-analytics">Optional Usage Analytics</a></li>
     <li><a href="#development">Development</a></li>
     <li><a href="#free-hosting">Free Hosting</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
@@ -281,6 +282,31 @@ Legacy v2 `localStorage` resume/history/notebook/theme data migrates once into I
 The app makes no account-backed upload of your local question packs or attempts. Project/support links open the relevant external website. Answers are included in JSON packs and the client; this is a personal-study tool, with no server-side assessment integrity controls. Only use and share source material you have permission to distribute.
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
+
+## Optional Usage Analytics
+
+On the [production site](https://dagerottdev.github.io/ExamEngine/), an optional notice offers **Allow analytics** and **Don’t allow**. Nothing is sent and no analytics identifier is created before consent. Change your choice under **Settings → Privacy → Usage analytics**. Declining stops new events and removes the identifier; allowing again creates a fresh one. Choices synchronize across tabs and stay separate from backups, restore/undo, and appearance resets.
+
+Explicit usage events go to **PostHog Cloud in the US** using native fetch. There is no analytics SDK, automatic click capture, person profile, or recording. Questions, answers, scores, notes, filenames, attachments, workspace/session IDs, passwords, full URLs, and query strings are excluded. A fixed traffic category replaces raw referrer URLs. Requests omit cookies and the HTTP referrer; project IP anonymization is enabled. PostHog still receives the connection needed to process a request.
+
+| Event | Allowed application properties |
+| --- | --- |
+| `app_opened` | `app_version`, `traffic` (Reddit, X, GitHub, search, direct, other) |
+| `screen_viewed` | `screen` (home, library, study, progress, settings, exam, results) |
+| `session_started` | `kind` (exam, study, mock, revision, retest), `question_count` |
+| `session_resumed` | `kind` |
+| `session_completed` | `kind`, `submission` (manual, timer) |
+| `pack_imported` | `source` (sample, file), `result` (added, deduplicated) |
+| `pack_published` | `question_count` |
+| `backup_exported` | `encrypted` (boolean) |
+| `backup_restored` | `mode` (merge, replace) |
+| `appearance_applied` | `preset` (focused, compact, spacious) |
+
+Each payload also includes the public project token, event name, random browser `distinct_id`, and fixed `$process_person_profile: false` / `$geoip_disable: true`. Unknown event names and fields are discarded. Success events follow successful action/save boundaries; resume does not emit another start. Screen events follow navigation rather than rendering. `app_opened` is attempted once per page load after consent. Offline/blocked events are dropped without a queue or retry and never delay timers, rendering, or saving. Unavailable browser storage keeps collection off.
+
+Collection is restricted to `https://dagerottdev.github.io/ExamEngine/` and its `index.html` URL. Localhost, previews, forks, other paths, and downloaded `file://` copies do not collect events. [Configuration](src/analytics-config.json) contains only a **public project token**, never an administrative key. Set the token to an empty string and rebuild to disable collection globally.
+
+Owners can view the **ExamEngine Usage** dashboard in the dedicated PostHog project (sign-in required). Counts are **consenting browser estimates**, not exact people. Declined consent, offline use, blockers, multiple devices, cleared storage, and consent resets affect totals. Funnels link a browser’s starts and completions, rather than an individual session ID. Seven-day retention needs seven days of collected history; earlier usage cannot be reconstructed. See [the analytics report](docs/USAGE_ANALYTICS.md) for dashboard access and deployment verification.
 
 ## Development
 

@@ -2000,16 +2000,16 @@ globalThis.__EXAM_PDF_WORKER__="/**\n * @licstart The following is the entire li
     const wrongQuestionIds = score.results.filter((r) => !r.isCorrect).map((r) => r.q.id);
     return { topics, weakTopics, wrongQuestionIds };
   }
-  function buildAdaptiveRequest(pack, analytics, count = 15) {
+  function buildAdaptiveRequest(pack, analytics, count2 = 15) {
     return {
       type: "adaptive-retest-request",
-      count,
+      count: count2,
       targetDifficulty: "hard",
       subject: pack.exam.subject,
       source: pack.source || {},
       focusTopics: analytics.weakTopics,
       avoidQuestionIds: analytics.wrongQuestionIds,
-      instruction: `Generate ${count} new questions focused on the weakest topics. Do not repeat existing stems; preserve source grounding and sourceRefs.`
+      instruction: `Generate ${count2} new questions focused on the weakest topics. Do not repeat existing stems; preserve source grounding and sourceRefs.`
     };
   }
 
@@ -2134,15 +2134,15 @@ globalThis.__EXAM_PDF_WORKER__="/**\n * @licstart The following is the entire li
     return [...records.values()].sort((a, b) => a.dueAt - b.dueAt || a.questionUid.localeCompare(b.questionUid));
   }
   function buildMock(workspace2, options = {}, now = Date.now()) {
-    const count = Number(options.count ?? 20);
-    if (!Number.isInteger(count) || count < 1) throw new Error("Question count must be a positive integer.");
+    const count2 = Number(options.count ?? 20);
+    if (!Number.isInteger(count2) || count2 < 1) throw new Error("Question count must be a positive integer.");
     const matches = (values, value) => !values?.length || values.includes(value);
     let candidates = collectQuestions(workspace2).filter((question) => matches(options.packIds, question.libraryPackId) && matches(options.topics, question.topic || "Uncategorised") && matches(options.difficulties, question.difficulty || "moderate"));
     if (options.avoidRecent !== false) {
       const recent = new Set(workspaceEvents(workspace2).filter((event) => new Date(event.date).getTime() >= now - 7 * DAY).map((event) => event.questionUid));
       candidates = candidates.filter((question) => !recent.has(question.questionUid));
     }
-    if (candidates.length < count) throw new Error(`Only ${candidates.length} questions match; ${count} requested. Change the filters or allow recent questions.`);
+    if (candidates.length < count2) throw new Error(`Only ${candidates.length} questions match; ${count2} requested. Change the filters or allow recent questions.`);
     const rank = (text) => {
       let hash2 = 2166136261;
       for (const char of text) hash2 = Math.imul(hash2 ^ char.charCodeAt(0), 16777619);
@@ -2156,8 +2156,8 @@ globalThis.__EXAM_PDF_WORKER__="/**\n * @licstart The following is the entire li
       groups.get(topic).push(question);
     });
     const questions = [];
-    while (questions.length < count) for (const group of groups.values()) {
-      if (group.length && questions.length < count) questions.push(group.shift());
+    while (questions.length < count2) for (const group of groups.values()) {
+      if (group.length && questions.length < count2) questions.push(group.shift());
     }
     questions.forEach((question, i) => {
       question.id = i + 1;
@@ -11066,7 +11066,7 @@ globalThis.__EXAM_PDF_WORKER__="/**\n * @licstart The following is the entire li
     }
     getIR() {
       const dataView = this.view;
-      const kind = this.data[PATTERN_INFO.KIND];
+      const kind2 = this.data[PATTERN_INFO.KIND];
       const hasBBox = !!this.data[PATTERN_INFO.HAS_BBOX];
       const hasBackground = !!this.data[PATTERN_INFO.HAS_BACKGROUND];
       const nCoord = dataView.getUint32(PATTERN_INFO.N_COORD, true);
@@ -11098,13 +11098,13 @@ globalThis.__EXAM_PDF_WORKER__="/**\n * @licstart The following is the entire li
         background = new Uint8Array(this.buffer, offset, 3);
         offset += 3;
       }
-      if (kind === 1) {
+      if (kind2 === 1) {
         return ["RadialAxial", "axial", bbox, stops, [coords[0], coords[1]], [coords[2], coords[3]], null, null];
       }
-      if (kind === 2) {
+      if (kind2 === 2) {
         return ["RadialAxial", "radial", bbox, stops, [coords[0], coords[1]], [coords[3], coords[4]], coords[2], coords[5]];
       }
-      if (kind === 3) {
+      if (kind2 === 3) {
         const shadingType = this.data[PATTERN_INFO.SHADING_TYPE];
         let bounds = null;
         if (coords.length > 0) {
@@ -11115,7 +11115,7 @@ globalThis.__EXAM_PDF_WORKER__="/**\n * @licstart The following is the entire li
         }
         return ["Mesh", shadingType, coords, colors, nCoord, bounds, bbox, background];
       }
-      throw new Error(`Unsupported pattern kind: ${kind}`);
+      throw new Error(`Unsupported pattern kind: ${kind2}`);
     }
   };
   var FontPathInfo = class {
@@ -11628,33 +11628,33 @@ globalThis.__EXAM_PDF_WORKER__="/**\n * @licstart The following is the entire li
       this.wasmUrl = wasmUrl;
     }
     async fetch({
-      kind,
+      kind: kind2,
       filename
     }) {
-      switch (kind) {
+      switch (kind2) {
         case "cMapUrl":
         case "standardFontDataUrl":
         case "wasmUrl":
           break;
         default:
-          unreachable(`Not implemented: ${kind}`);
+          unreachable(`Not implemented: ${kind2}`);
       }
-      const baseUrl = this[kind];
+      const baseUrl = this[kind2];
       if (!baseUrl) {
-        throw new Error(`Ensure that the \`${kind}\` API parameter is provided.`);
+        throw new Error(`Ensure that the \`${kind2}\` API parameter is provided.`);
       }
       const url = `${baseUrl}${filename}`;
-      return this._fetch(url, kind).catch((reason) => {
-        throw new Error(`Unable to load ${this.#errorStr[kind]} data at: ${url}`);
+      return this._fetch(url, kind2).catch((reason) => {
+        throw new Error(`Unable to load ${this.#errorStr[kind2]} data at: ${url}`);
       });
     }
-    async _fetch(url, kind) {
+    async _fetch(url, kind2) {
       unreachable("Abstract method `_fetch` called.");
     }
   };
   var DOMBinaryDataFactory = class extends BaseBinaryDataFactory {
-    async _fetch(url, kind) {
-      const type = kind === "cMapUrl" && !url.endsWith(".bcmap") ? "text" : "bytes";
+    async _fetch(url, kind2) {
+      const type = kind2 === "cMapUrl" && !url.endsWith(".bcmap") ? "text" : "bytes";
       const data = await fetchData(url, type);
       return data instanceof Uint8Array ? data : stringToBytes(data);
     }
@@ -12132,7 +12132,7 @@ globalThis.__EXAM_PDF_WORKER__="/**\n * @licstart The following is the entire li
     }
   };
   var NodeBinaryDataFactory = class extends BaseBinaryDataFactory {
-    async _fetch(url, kind) {
+    async _fetch(url, kind2) {
       return node_utils_fetchData(url);
     }
   };
@@ -13162,7 +13162,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
     const {
       width,
       height,
-      kind
+      kind: kind2
     } = imgData;
     const partialChunkHeight = height % FULL_CHUNK_HEIGHT;
     const fullChunks = (height - partialChunkHeight) / FULL_CHUNK_HEIGHT;
@@ -13172,7 +13172,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
     const src = imgData.data;
     const dest = chunkImgData.data;
     let i;
-    if (kind === ImageKind.GRAYSCALE_1BPP) {
+    if (kind2 === ImageKind.GRAYSCALE_1BPP) {
       for (i = 0; i < totalChunks; i++) {
         ({
           srcPos
@@ -13185,7 +13185,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
         }));
         ctx.putImageData(chunkImgData, 0, i * FULL_CHUNK_HEIGHT);
       }
-    } else if (kind === ImageKind.RGBA_32BPP) {
+    } else if (kind2 === ImageKind.RGBA_32BPP) {
       let j = 0;
       let elemsInThisChunk = width * FULL_CHUNK_HEIGHT * 4;
       for (i = 0; i < fullChunks; i++) {
@@ -13199,7 +13199,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
         dest.set(src.subarray(srcPos, srcPos + elemsInThisChunk));
         ctx.putImageData(chunkImgData, 0, j);
       }
-    } else if (kind === ImageKind.RGB_24BPP) {
+    } else if (kind2 === ImageKind.RGB_24BPP) {
       for (i = 0; i < totalChunks; i++) {
         ({
           srcPos
@@ -13213,7 +13213,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
         ctx.putImageData(chunkImgData, 0, i * FULL_CHUNK_HEIGHT);
       }
     } else {
-      throw new Error(`bad image kind: ${kind}`);
+      throw new Error(`bad image kind: ${kind2}`);
     }
   }
   function putBinaryImageMask(ctx, imgData) {
@@ -15335,9 +15335,9 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
       if (!this.contentVisible) {
         return;
       }
-      const count = img.count;
+      const count2 = img.count;
       img = this.getObject(opIdx, img.data, img);
-      img.count = count;
+      img.count = count2;
       const started = this.#beginKnockoutElement(this.current.fillAlpha);
       const ctx = this.ctx;
       const mask = this._createMaskCanvas(opIdx, img);
@@ -20585,7 +20585,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
       unreachable("Abstract method `AnnotationElement.render` called");
     }
     _getElementsByName(name, skipId = null) {
-      const fields = [];
+      const fields2 = [];
       if (this._fieldObjects) {
         const fieldObj = this._fieldObjects.get(name) || [];
         for (const {
@@ -20602,13 +20602,13 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
             warn(`_getElementsByName - element not allowed: ${id}`);
             continue;
           }
-          fields.push({
+          fields2.push({
             id,
             exportValue,
             domElement
           });
         }
-        return fields;
+        return fields2;
       }
       for (const domElement of document.getElementsByName(name)) {
         const {
@@ -20618,13 +20618,13 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
         if (id === skipId || !GetElementsByNameSet.has(domElement)) {
           continue;
         }
-        fields.push({
+        fields2.push({
           id,
           exportValue,
           domElement
         });
       }
-      return fields;
+      return fields2;
     }
     show() {
       if (this.container) {
@@ -20902,19 +20902,19 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
         if (resetFormFields.length !== 0 || resetFormRefs.length !== 0) {
           const fieldIds = new Set(resetFormRefs);
           for (const fieldName of resetFormFields) {
-            const fields = this._fieldObjects.get(fieldName) || [];
+            const fields2 = this._fieldObjects.get(fieldName) || [];
             for (const {
               id
-            } of fields) {
+            } of fields2) {
               fieldIds.add(id);
             }
           }
           const kidIdsById = /* @__PURE__ */ new Map();
-          for (const fields of this._fieldObjects.values()) {
+          for (const fields2 of this._fieldObjects.values()) {
             for (const {
               id,
               kidIds
-            } of fields) {
+            } of fields2) {
               if (kidIds) {
                 kidIdsById.set(id, kidIds);
               }
@@ -20925,16 +20925,16 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
               fieldIds.add(kidId);
             }
           }
-          for (const fields of this._fieldObjects.values()) {
-            for (const field of fields) {
+          for (const fields2 of this._fieldObjects.values()) {
+            for (const field of fields2) {
               if (fieldIds.has(field.id) === include) {
                 allFields.push(field);
               }
             }
           }
         } else {
-          for (const fields of this._fieldObjects.values()) {
-            allFields.push(...fields);
+          for (const fields2 of this._fieldObjects.values()) {
+            allFields.push(...fields2);
           }
         }
         const storage = this.annotationStorage;
@@ -27916,9 +27916,9 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
           offset += chunk.length;
         }
         const header = new Uint32Array(data.buffer, 0, data.length >> 2);
-        const version2 = header[1];
-        if (version2 !== 0) {
-          throw new Error(`Invalid version: ${version2}`);
+        const version3 = header[1];
+        if (version3 !== 0) {
+          throw new Error(`Invalid version: ${version3}`);
         }
         const width = header[2];
         const height = header[3];
@@ -30482,6 +30482,166 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
     return result;
   }
 
+  // src/analytics-config.json
+  var analytics_config_default = {
+    publicToken: "phc_soeAyDM96XAiwzGvJjJSqzx9QZ4MUxCBX5PhFUYVi238",
+    origin: "https://dagerottdev.github.io",
+    paths: ["/ExamEngine/", "/ExamEngine/index.html"]
+  };
+
+  // package.json
+  var package_default = {
+    name: "exam-engine",
+    version: "2.1.0",
+    license: "MIT",
+    private: true,
+    type: "module",
+    scripts: {
+      build: "node scripts/build.mjs",
+      "build:check": "node scripts/build.mjs --check",
+      test: "node --test tests/*.test.mjs",
+      "test:validator": "python3 -m unittest tests/validator_test.py",
+      "validate:sample": "python3 .agents/skills/mcq-pack-generator/scripts/validate_pack.py mcq-exam-website/sample-mcq-pack.json",
+      verify: "npm test && npm run test:validator && npm run validate:sample",
+      "test:browser": "node scripts/browser-check.mjs"
+    },
+    engines: {
+      node: ">=22.13.0"
+    },
+    dependencies: {
+      "pdfjs-dist": "^6.4.299"
+    },
+    devDependencies: {
+      esbuild: "^0.28.2",
+      playwright: "^1.63.0"
+    }
+  };
+
+  // src/core/usage-analytics.js
+  var { version: version2 } = package_default;
+  var CONSENT_KEY = "exam-engine:analytics:consent";
+  var IDENTIFIER_KEY = "exam-engine:analytics:browser";
+  var endpoint = "https://us.i.posthog.com/i/v0/e/";
+  var oneOf = (...values) => (value) => values.includes(value);
+  var count = (value) => Number.isInteger(value) && value > 0 && value <= 1e4;
+  var kind = oneOf("exam", "study", "mock", "revision", "retest");
+  var screen = oneOf("home", "library", "study", "progress", "settings", "exam", "results");
+  var fields = {
+    app_opened: { app_version: (value) => value === version2, traffic: oneOf("Reddit", "X", "GitHub", "search", "direct", "other") },
+    screen_viewed: { screen },
+    session_started: { kind, question_count: count },
+    session_resumed: { kind },
+    session_completed: { kind, submission: oneOf("manual", "timer") },
+    pack_imported: { source: oneOf("sample", "file"), result: oneOf("added", "deduplicated") },
+    pack_published: { question_count: count },
+    backup_exported: { encrypted: (value) => typeof value === "boolean" },
+    backup_restored: { mode: oneOf("merge", "replace") },
+    appearance_applied: { preset: oneOf("focused", "compact", "spacious") }
+  };
+  function trafficCategory(referrer, origin) {
+    if (!referrer) return "direct";
+    try {
+      const url = new URL(referrer);
+      if (url.origin === origin) return "direct";
+      const host = url.hostname;
+      const matches = (domain) => host === domain || host.endsWith(`.${domain}`);
+      if (matches("reddit.com")) return "Reddit";
+      if (matches("x.com") || matches("twitter.com") || host === "t.co") return "X";
+      if (matches("github.com")) return "GitHub";
+      if (/^(www\.)?google\.[a-z.]+$/.test(host) || ["bing.com", "duckduckgo.com", "search.yahoo.com"].some(matches)) return "search";
+    } catch {
+    }
+    return "other";
+  }
+  function createUsageAnalytics(env = globalThis, settings = analytics_config_default) {
+    let opened = false, currentScreen = "home", storageFailed = false;
+    const eligible = () => /^phc_[A-Za-z0-9_-]+$/.test(settings.publicToken) && env.location?.origin === settings.origin && settings.paths.includes(env.location.pathname);
+    function readConsent() {
+      try {
+        const value = env.localStorage.getItem(CONSENT_KEY);
+        return value === "allow" || value === "deny" ? value : null;
+      } catch {
+        return null;
+      }
+    }
+    function track2(event, properties = {}) {
+      try {
+        if (storageFailed || !eligible() || readConsent() !== "allow" || env.navigator?.onLine === false || !Object.hasOwn(fields, event)) return;
+        let id = env.localStorage.getItem(IDENTIFIER_KEY);
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id || "")) {
+          id = env.crypto.randomUUID();
+          env.localStorage.setItem(IDENTIFIER_KEY, id);
+          if (env.localStorage.getItem(IDENTIFIER_KEY) !== id) return;
+        }
+        const allowed = {};
+        for (const [key, valid] of Object.entries(fields[event])) if (Object.hasOwn(properties, key) && valid(properties[key])) allowed[key] = properties[key];
+        const body = JSON.stringify({ api_key: settings.publicToken, event, distinct_id: id, properties: { ...allowed, $process_person_profile: false, $geoip_disable: true } });
+        Promise.resolve(env.fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body, credentials: "omit", referrerPolicy: "no-referrer", keepalive: true })).catch(() => {
+        });
+      } catch {
+      }
+    }
+    function activate() {
+      if (!eligible() || readConsent() !== "allow") return;
+      if (!opened) {
+        opened = true;
+        track2("app_opened", { app_version: version2, traffic: trafficCategory(env.document?.referrer, settings.origin) });
+        track2("screen_viewed", { screen: currentScreen });
+      }
+    }
+    function viewScreen(next) {
+      if (!screen(next) || next === currentScreen) return;
+      currentScreen = next;
+      track2("screen_viewed", { screen: next });
+    }
+    function setConsent(choice) {
+      if (!oneOf("allow", "deny")(choice)) return false;
+      try {
+        if (choice === "deny") env.localStorage.removeItem(IDENTIFIER_KEY);
+        env.localStorage.setItem(CONSENT_KEY, choice);
+        if (readConsent() !== choice) return false;
+      } catch {
+        storageFailed = true;
+        return false;
+      }
+      storageFailed = false;
+      activate();
+      return true;
+    }
+    return { track: track2, viewScreen, readConsent, setConsent, eligible, activate };
+  }
+  var usageAnalytics = createUsageAnalytics();
+  var track = usageAnalytics.track;
+  function initializeAnalyticsControls() {
+    const description = "Optional usage events go to PostHog in the US with a random browser identifier. Questions, answers, scores, notes, attachments, and backups stay local. No recordings or automatic click tracking.";
+    const buttons = `<div class="row wrap"><button data-analytics-consent="allow">Allow analytics</button><button data-analytics-consent="deny">Don\u2019t allow</button></div>`;
+    document.querySelector(".workspace-nav").insertAdjacentHTML("beforebegin", `<section id="analytics-notice" class="card" aria-labelledby="analytics-notice-heading" hidden><h2 id="analytics-notice-heading">Help improve ExamEngine?</h2><p>${description} You can change your choice in Settings \u2192 Privacy.</p>${buttons}<p id="analytics-notice-status" role="status"></p></section>`);
+    document.getElementById("settings-panel").insertAdjacentHTML("beforeend", `<section class="card" aria-labelledby="privacy-heading"><h3 id="privacy-heading">Privacy</h3><h4>Usage analytics</h4><p>${description}</p><p id="analytics-status" role="status"></p>${buttons}</section>`);
+    function render() {
+      const eligible = usageAnalytics.eligible(), consent = usageAnalytics.readConsent();
+      document.getElementById("analytics-notice").hidden = !eligible || consent !== null;
+      document.getElementById("analytics-status").textContent = !eligible ? "Analytics is unavailable on this copy. Collection is limited to the configured production site." : consent === "allow" ? "Analytics allowed. Disabling removes this browser\u2019s analytics identifier." : consent === "deny" ? "Analytics declined. No usage events are sent." : "Analytics is off until you allow it.";
+      document.querySelectorAll("[data-analytics-consent]").forEach((button) => {
+        button.disabled = !eligible;
+        button.setAttribute("aria-pressed", String(consent === button.dataset.analyticsConsent));
+      });
+    }
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-analytics-consent]");
+      if (!button) return;
+      const saved = usageAnalytics.setConsent(button.dataset.analyticsConsent);
+      render();
+      for (const id of ["analytics-status", "analytics-notice-status"]) if (!saved) document.getElementById(id).textContent = "Could not save your privacy choice. Analytics stays off when browser storage is unavailable.";
+    });
+    window.addEventListener("storage", (event) => {
+      if (event.key !== null && event.key !== CONSENT_KEY && event.key !== IDENTIFIER_KEY) return;
+      usageAnalytics.activate();
+      render();
+    });
+    usageAnalytics.activate();
+    render();
+  }
+
   // src/workspace-ui.js
   var FONTS = { system: "system-ui, sans-serif", source: '"Source Sans 3", sans-serif', lexend: "Lexend, sans-serif", atkinson: '"Atkinson Hyperlegible", sans-serif', lora: "Lora, serif" };
   var $ = (id) => document.getElementById(id);
@@ -30656,6 +30816,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
         await save(["preferences"]);
         applyPreferences();
         $("appearance-dialog").close();
+        track("appearance_applied", { preset: ws().preferences.layout });
       });
       $("appearance-dialog").addEventListener("close", () => applyPreferences());
       $("reset-layout").onclick = () => {
@@ -30675,6 +30836,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
         await saveQueueReady();
         const backup = await encodeBackup(deepClone(ws()), password);
         download2(`examengine-backup-${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10)}.json`, backup);
+        track("backup_exported", { encrypted: Boolean(password) });
         $("backup-password").value = $("backup-confirm").value = "";
         notify2("Backup downloaded. Save it to your chosen drive or folder.");
       });
@@ -30755,9 +30917,9 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
       render();
     }
     function render() {
-      const count = due().length;
-      $("today-summary").textContent = count ? `${count} questions are ready for another look.` : "No reviews due. Start a pack to build your revision queue.";
-      $("due-summary").textContent = `${count} due questions \xB7 ${ws().review.length} tracked questions`;
+      const count2 = due().length;
+      $("today-summary").textContent = count2 ? `${count2} questions are ready for another look.` : "No reviews due. Start a pack to build your revision queue.";
+      $("due-summary").textContent = `${count2} due questions \xB7 ${ws().review.length} tracked questions`;
       $("home-weak").textContent = [...new Set(ws().attempts.slice(0, 10).flatMap((a) => a.weakTopics || []))].join(", ") || "Complete a session to find topics to revisit.";
       reorderCards();
       renderLibrary();
@@ -30791,15 +30953,15 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
     function updateMockAvailability() {
       try {
         const opt = mockOptions();
-        let count = 0;
+        let count2 = 0;
         for (const q of questions()) {
           if (opt.packIds.length && !opt.packIds.includes(q.libraryPackId)) continue;
           if (opt.topics.length && !opt.topics.includes(q.topic || "Uncategorised")) continue;
           if (opt.difficulties.length && !opt.difficulties.includes(q.difficulty)) continue;
           if (opt.avoidRecent && ws().attempts.some((a) => Number(a.date) > Date.now() - 7 * 864e5 && a.events?.some((e) => e.questionUid === q.questionUid))) continue;
-          count++;
+          count2++;
         }
-        $("mock-available").textContent = `${count} questions match your selection.`;
+        $("mock-available").textContent = `${count2} questions match your selection.`;
       } catch {
       }
     }
@@ -30812,9 +30974,9 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
     }
     async function startRevision() {
       assertIdle();
-      const count = formNumber("revision-count", 20);
-      if (!Number.isInteger(count) || count < 1 || count > 100) throw Error("Choose between 1 and 100 revision questions.");
-      const chosen = due().sort((a, b) => a.dueAt - b.dueAt).slice(0, count);
+      const count2 = formNumber("revision-count", 20);
+      if (!Number.isInteger(count2) || count2 < 1 || count2 > 100) throw Error("Choose between 1 and 100 revision questions.");
+      const chosen = due().sort((a, b) => a.dueAt - b.dueAt).slice(0, count2);
       if (!chosen.length) {
         navigate("library");
         notify2("No questions are due. Choose a saved pack to study.");
@@ -30998,6 +31160,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
         $("editor-panel").hidden = true;
         render();
         notify2(api.store() ? "Pack published to your library." : "Pack added to temporary library. Download a backup before closing.", !api.store());
+        track("pack_published", { question_count: record.pack.questions.length });
       });
       $("draft-export").onclick = guarded(() => {
         readEditor();
@@ -31263,28 +31426,29 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
       applyPreferences();
       navigate("home");
       notify2(`Backup ${mode === "merge" ? "merged" : "restored"}: ${result.report.added} records added, ${result.report.skipped} duplicates skipped, ${result.report.conflicts.length} conflicts preserved.`);
+      track("backup_restored", { mode });
     }
     function openAdaptive(pack, analytics) {
       $("adaptive-topics").value = analytics.weakTopics.join("\n");
       $("adaptive-dialog").showModal();
       $("adaptive-form").onsubmit = guarded((e) => {
         e.preventDefault();
-        const count = formNumber("adaptive-count");
+        const count2 = formNumber("adaptive-count");
         const focusTopics = $("adaptive-topics").value.split("\n").map((t) => t.trim()).filter(Boolean);
-        if (!Number.isInteger(count) || count < 1 || count > 100) throw Error("Choose between 1 and 100 questions.");
+        if (!Number.isInteger(count2) || count2 < 1 || count2 > 100) throw Error("Choose between 1 and 100 questions.");
         if (!focusTopics.length) throw Error("Select at least one focus topic.");
-        const req = { ...buildAdaptiveRequest(pack, analytics, count), focusTopics, targetDifficulty: $("adaptive-difficulty").value, questionType: $("adaptive-type").value, packId: pack.packId, avoidQuestionUids: pack.questions.map((q) => q.questionUid) };
+        const req = { ...buildAdaptiveRequest(pack, analytics, count2), focusTopics, targetDifficulty: $("adaptive-difficulty").value, questionType: $("adaptive-type").value, packId: pack.packId, avoidQuestionUids: pack.questions.map((q) => q.questionUid) };
         req.attemptId = state2.session?.id;
         req.revision = state2.session?.revision;
         req.sourceReferences = [...new Set(pack.questions.flatMap((q) => q.sourceRefs || []))];
         req.sourceDocuments = pack.questions.flatMap((q) => (q.sourceBindings || []).map((b) => ({ ...b, name: ws().sources.find((s) => s.id === b.sourceId)?.name })));
-        req.instruction = `Generate ${count} new ${req.questionType} questions at ${req.targetDifficulty} difficulty focused on ${focusTopics.join(", ")}. Preserve source grounding and do not repeat stems.`;
+        req.instruction = `Generate ${count2} new ${req.questionType} questions at ${req.targetDifficulty} difficulty focused on ${focusTopics.join(", ")}. Preserve source grounding and do not repeat stems.`;
         download2(`${pack.exam.title}-adaptive-request.json`, req);
         $("adaptive-dialog").close();
       });
       return true;
     }
-    return { wire: wire2, render, navigate, applyPreferences, openAppearance, openAdaptive };
+    return { wire: wire2, render, navigate, applyPreferences, openAppearance, openAdaptive, currentScreen: () => section };
   }
 
   // src/app.js
@@ -31338,6 +31502,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
   function show(id) {
     ["landing-view", "exam-view", "result-view"].forEach((x) => $2(x).hidden = x !== id);
     window.scrollTo(0, 0);
+    usageAnalytics.viewScreen(id === "exam-view" ? "exam" : id === "result-view" ? "results" : workspaceUI?.currentScreen() || "home");
   }
   function formatTime(ms) {
     if (ms == null) return "\u2014";
@@ -31433,8 +31598,10 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
     if (upgraded.questions.some((question) => question.sourceBindings?.some((binding) => !sources.has(binding.sourceId)))) return showErrors(["Missing local source files. Import the full workspace backup containing them, or remove the local source links from this pack."]);
     try {
       const record = await identifyPack(upgraded, workspace.packs);
-      if (!workspace.packs.some((p) => p.id === record.id)) workspace.packs.push(record);
+      const deduplicated = workspace.packs.some((p) => p.id === record.id);
+      if (!deduplicated) workspace.packs.push(record);
       await saveWorkspace(["packs"]);
+      track("pack_imported", { source: quickStart ? "sample" : "file", result: deduplicated ? "deduplicated" : "added" });
       $2("migration-note").textContent = `${wasLegacy ? "Upgraded legacy pack. " : ""}${store ? "Saved" : "Temporarily added"} ${sourceLabel} to your library.`;
       workspaceUI?.render();
       if (quickStart) await startRecord(record);
@@ -31479,6 +31646,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
     workspaceUI?.applyPreferences();
     state.timerId = setInterval(onTick, 250);
     show("exam-view");
+    track("session_started", { kind: state.session.kind || state.pack.delivery.mode, question_count: state.pack.questions.length });
   }
   async function resumeSession() {
     const saved = workspace.session;
@@ -31501,6 +31669,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
     workspaceUI?.applyPreferences();
     state.timerId = setInterval(onTick, 250);
     show("exam-view");
+    track("session_resumed", { kind: state.session.kind || state.pack.delivery.mode });
     onTick();
   }
   function persistSession() {
@@ -31683,10 +31852,16 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
     clearResume();
     saveHistory();
     saveNotebook();
-    saveWorkspace(["session", "attempts", "review", "notebook"]).catch(() => {
-    });
+    const completedKind = state.session.kind || state.pack.delivery.mode;
+    const saved = saveWorkspace(["session", "attempts", "review", "notebook"]);
     renderResults(reason);
     show("result-view");
+    try {
+      await saved;
+    } catch {
+      return;
+    }
+    track("session_completed", { kind: completedKind, submission: auto ? "timer" : "manual" });
   }
   function saveHistory() {
     const date = state.session.submittedAt;
@@ -31897,6 +32072,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
     renderHistory();
     renderNotebook();
     show("landing-view");
+    initializeAnalyticsControls();
     if (workspace.meta.migrationWarning) notify(workspace.meta.migrationWarning + ". Original browser data was retained.", true);
     if (globalThis.BroadcastChannel) {
       channel = new BroadcastChannel("exam-engine-workspace");

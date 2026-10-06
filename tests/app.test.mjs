@@ -11,7 +11,7 @@ const source = (await readFile(new URL("../src/app.js", import.meta.url), "utf8"
   .split('\nasync function initialize()')[0];
 const sample = JSON.parse(await readFile(new URL("../mcq-exam-website/sample-mcq-pack.json", import.meta.url)));
 function controller(extra = {}) {
-  const context = vm.createContext({ ...core, emptyWorkspace, ...extra });
+  const context = vm.createContext({ ...core, emptyWorkspace, track: () => {}, usageAnalytics: {viewScreen() {}}, ...extra });
   vm.runInContext(source, context);
   return context;
 }
@@ -94,4 +94,22 @@ test("manual submission respects cancellation and exports accurate result/adapti
   accept(true); await pending;
   assert.equal(context.submissions, 1);
 
+});
+
+test('session success events follow durable saves; failed starts, resumes and submissions emit none', async () => {
+  const events=[];
+  const context=controller({pack:structuredClone(sample),document:{querySelector(){return null;}},track:(event,properties)=>events.push({event,properties}),clearInterval(){},setInterval(){return 1;},confirmAction:async()=>true});
+  vm.runInContext(`
+    state.pack = pack;
+    renderExamShell = renderResults = renderTimers = show = clearResume = saveHistory = saveNotebook = () => {};
+    saveWorkspace = () => Promise.resolve();
+  `,context);
+  await vm.runInContext('beginNewSession({kind:"mock"})',context);
+  assert.equal(events.length,1);assert.deepEqual(events[0].properties.kind,'mock');assert.equal(events[0].properties.question_count,9);
+  vm.runInContext('workspace.session.session.owner = null',context);
+  await vm.runInContext('resumeSession()',context);assert.equal(events.at(-1).event,'session_resumed');
+  vm.runInContext('saveWorkspace = () => Promise.reject(Error("Injected save failure"));',context);
+  await vm.runInContext('submitExam(true)',context);assert.equal(events.length,2);
+  await vm.runInContext('beginNewSession({kind:"retest"})',context);assert.equal(events.length,2);
+  await vm.runInContext('resumeSession()',context);assert.equal(events.length,2);
 });
