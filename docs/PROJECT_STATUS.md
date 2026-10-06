@@ -6,7 +6,7 @@
 
 **Pack schema:** 2.0
 
-**Status date:** 2026-10-05
+**Status date:** 2026-10-06
 
 **Recorded v2 merge:** `e8ac6116330e57b953c2482815cfb027338caa73`
 
@@ -14,13 +14,15 @@
 
 ## Current state
 
-ExamEngine 2.1 is pushed to `main` and deployed at the [Pages address](https://dagerottdev.github.io/ExamEngine/). Application commit `b8e7fb879db28841e4a3e6573966bda267d78245` passed the [verification and deployment workflow](https://github.com/DagerottDev/ExamEngine/actions/runs/37350864402). The public HTML returned HTTP 200 and matched the tested local distribution byte-for-byte (4,906,210 bytes; SHA-256 `cb467b17dc9b242e4b3cd53957a11711a27f7d527e4e5b05d47b3713d1d422d8`). It remains a free, MIT-licensed, static local-first product with optional support links.
+ExamEngine 2.1 is pushed to `main` and deployed at the [Pages address](https://dagerottdev.github.io/ExamEngine/). Application commit `66eeae1b5c35f7c65e9e4e22c22de74bc5d8aaa7` passed the [verification and deployment workflow](https://github.com/DagerottDev/ExamEngine/actions/runs/37476167513). The public HTML returned HTTP 200 and matched the tested local distribution byte-for-byte (4,915,983 bytes; SHA-256 `8d7e207fc8a350e5aa9236aabadf1c8af8ecf2e130095b646cd47307bb88f3e8`). It remains a free, MIT-licensed, static local-first product with optional support links.
+
+Optional, consent-only usage analytics is deployed with the PostHog US Free project and seven-chart private owner dashboard. Questions, answers, scores, notes, sources, and backups stay local. See [USAGE_ANALYTICS](USAGE_ANALYTICS.md) for the payload contract, consent acceptance, native chart definitions, launch QA counts, and retention limits.
 
 The complete eight-area scope remains required. Current code exposes all eight areas; completed browser acceptance and remaining platform limits are tracked in [E2E_REPORT](E2E_REPORT.md). That report is the authority for actual browsers, fixtures, downloads, and verification limits. Earlier v2 launch evidence does not automatically cover v2.1 workspace behavior.
 
 ## Completed local acceptance
 
-All eight capability areas and the cross-cutting persistence/continuity work have recorded Chromium evidence in [E2E_REPORT](E2E_REPORT.md). The local suite passes **32 Node checks, 7 Python checks, 9 native-storage checks, and 15 workflow checks**, plus sample validation, deterministic build freshness, actual JSON downloads, offline backup/PDF/expiry checks, and diff whitespace checks.
+All eight capability areas and the cross-cutting persistence/continuity work have recorded Chromium evidence in [E2E_REPORT](E2E_REPORT.md). The local suite passes **38 Node checks, 7 Python checks, 9 native-storage checks, and 15 workflow checks**, plus sample validation, deterministic build freshness, actual JSON downloads, offline backup/PDF/expiry checks, and diff whitespace checks.
 
 ```bash
 npm ci
@@ -41,7 +43,7 @@ Browser checks use isolated contexts and an ephemeral test origin. Generated scr
 
 These are platform follow-ups; the complete eight-area implementation is deployed. The refreshed README, badges, screenshot, and documentation anchors were checked in the GitHub-rendered page.
 
-The authorized release updates were published and verified on [Reddit in r/SideProject](https://www.reddit.com/r/SideProject/comments/1wyf9co/examengine_21_update_encrypted_backups_a_pack/) and [X](https://x.com/Rajveer761SM/status/2107166574767648993). This status update is documentation only; the deployed application revision remains the commit recorded above.
+The authorized release updates were published and verified on [Reddit in r/SideProject](https://www.reddit.com/r/SideProject/comments/1wyf9co/examengine_21_update_encrypted_backups_a_pack/) and [X](https://x.com/Rajveer761SM/status/2107166574767648993). Those launch posts cover the earlier workspace release. The analytics release is recorded above; no new promotional posts were sent.
 
 ## Preserved boundaries
 
