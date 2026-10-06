@@ -26,3 +26,7 @@ Launch verification used three consenting QA browser identifiers: two before the
 Onboarding is complete on the **Free** plan, with no payment card. Final project settings were checked after onboarding: IP anonymization enabled; autocapture, session recordings, console capture, and performance capture disabled. No SDK is loaded by the application. The installed connector was unavailable in this session, so project and dashboard setup used PostHog's browser-provided tools.
 
 Seven-day retention is configured and queryable, but future intervals require actual elapsed history. Feature events without production use show zero. Earlier usage cannot be reconstructed. Safari/Firefox, physical devices, and operating-system screen-reader output remain outside the existing Chromium acceptance evidence.
+
+## User notification
+
+On October 6, the public HTML was rechecked against the tested build with an identical SHA-256 before publishing the requested notices. The update is posted in the existing [r/SideProject announcement](https://www.reddit.com/r/SideProject/comments/1wyf9co/comment/pe871y4/) and [X launch thread](https://x.com/Rajveer761SM/status/2107477829458002382). Both final permalinks and the published text were browser-verified. Screenshots are in ignored `output/browser/analytics-announcement-reddit.jpg` and `analytics-announcement-x.jpg`.

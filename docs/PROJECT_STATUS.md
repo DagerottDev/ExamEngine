@@ -43,7 +43,7 @@ Browser checks use isolated contexts and an ephemeral test origin. Generated scr
 
 These are platform follow-ups; the complete eight-area implementation is deployed. The refreshed README, badges, screenshot, and documentation anchors were checked in the GitHub-rendered page.
 
-The authorized release updates were published and verified on [Reddit in r/SideProject](https://www.reddit.com/r/SideProject/comments/1wyf9co/examengine_21_update_encrypted_backups_a_pack/) and [X](https://x.com/Rajveer761SM/status/2107166574767648993). Those launch posts cover the earlier workspace release. The analytics release is recorded above; no new promotional posts were sent.
+The authorized release updates were published and verified on [Reddit in r/SideProject](https://www.reddit.com/r/SideProject/comments/1wyf9co/examengine_21_update_encrypted_backups_a_pack/) and [X](https://x.com/Rajveer761SM/status/2107166574767648993). Those launch posts cover the earlier workspace release. On October 6, the consent-only analytics update was published and browser-verified as a [Reddit follow-up](https://www.reddit.com/r/SideProject/comments/1wyf9co/comment/pe871y4/) and an [X thread reply](https://x.com/Rajveer761SM/status/2107477829458002382). Both explain that analytics requires consent, study content stays local, and the choice can be changed in Settings.
 
 ## Preserved boundaries
 
