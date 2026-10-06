@@ -38,6 +38,15 @@ test('reload, withdrawal and cross-tab consent preserve privacy and rotate ident
   second.setConsent('deny');assert.equal(f.storage.has(IDENTIFIER_KEY),false);const n=f.requests.length;f.analytics.track('session_completed',{kind:'study',submission:'manual'});assert.equal(f.requests.length,n);
   f.analytics.setConsent('allow');f.analytics.track('session_resumed',{kind:'study'});assert.notEqual(f.storage.get(IDENTIFIER_KEY),first);assert.equal(f.requests.filter(r=>r.payload.event==='app_opened').length,2);
 });
+test('capture timestamps preserve action order even within one millisecond or a backward clock adjustment', t => {
+  let now=Date.parse('2026-10-06T14:00:00Z');t.mock.method(Date,'now',()=>now);
+  const f=fixture();f.analytics.setConsent('allow');
+  f.analytics.track('session_started',{kind:'exam',question_count:9});now-=100;
+  f.analytics.track('session_completed',{kind:'exam',submission:'manual'});
+  const times=f.requests.map(r=>Date.parse(r.payload.timestamp));
+  assert.equal(times[0],Date.parse('2026-10-06T14:00:00Z'));
+  for(let i=1;i<times.length;i++)assert.equal(times[i],times[i-1]+1);
+});
 test('storage failures and rejected/synchronous fetch failures never escape to app workflows', async () => {
   const denied=fixture({localStorage:{getItem(){throw Error('denied');},setItem(){throw Error('denied');},removeItem(){throw Error('denied');}}});assert.equal(denied.analytics.setConsent('allow'),false);assert.doesNotThrow(()=>denied.analytics.track('session_started',{kind:'exam',question_count:9}));assert.equal(denied.requests.length,0);
   const quota=fixture();quota.analytics.setConsent('allow');const n=quota.requests.length;quota.env.localStorage.setItem=()=>{throw Error('quota');};assert.equal(quota.analytics.setConsent('deny'),false);quota.analytics.track('session_resumed',{kind:'exam'});assert.equal(quota.requests.length,n);

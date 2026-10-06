@@ -38,7 +38,7 @@ function trafficCategory(referrer, origin) {
 }
 
 export function createUsageAnalytics(env = globalThis, settings = config) {
-  let opened = false, currentScreen = "home", storageFailed = false;
+  let opened = false, currentScreen = "home", storageFailed = false, lastTimestamp = 0;
   const eligible = () => /^phc_[A-Za-z0-9_-]+$/.test(settings.publicToken) && env.location?.origin === settings.origin && settings.paths.includes(env.location.pathname);
   function readConsent() {
     try {
@@ -58,7 +58,9 @@ export function createUsageAnalytics(env = globalThis, settings = config) {
       const allowed = {};
       for (const [key, valid] of Object.entries(fields[event])) if (Object.hasOwn(properties, key) && valid(properties[key])) allowed[key] = properties[key];
       // Fixed schema only: no ambient browser properties, workspace data, or URLs.
-      const body = JSON.stringify({ api_key: settings.publicToken, event, distinct_id: id, properties: { ...allowed, $process_person_profile: false, $geoip_disable: true } });
+      // Preserve action order when concurrent requests arrive out of order.
+      lastTimestamp = Math.max(Date.now(), lastTimestamp + 1);
+      const body = JSON.stringify({ api_key: settings.publicToken, event, distinct_id: id, timestamp: new Date(lastTimestamp).toISOString(), properties: { ...allowed, $process_person_profile: false, $geoip_disable: true } });
       Promise.resolve(env.fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body, credentials: "omit", referrerPolicy: "no-referrer", keepalive: true })).catch(() => {});
     } catch { /* Analytics must never interrupt study or saving. */ }
   }

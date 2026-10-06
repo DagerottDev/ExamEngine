@@ -30554,7 +30554,7 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
     return "other";
   }
   function createUsageAnalytics(env = globalThis, settings = analytics_config_default) {
-    let opened = false, currentScreen = "home", storageFailed = false;
+    let opened = false, currentScreen = "home", storageFailed = false, lastTimestamp = 0;
     const eligible = () => /^phc_[A-Za-z0-9_-]+$/.test(settings.publicToken) && env.location?.origin === settings.origin && settings.paths.includes(env.location.pathname);
     function readConsent() {
       try {
@@ -30575,7 +30575,8 @@ fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
         }
         const allowed = {};
         for (const [key, valid] of Object.entries(fields[event])) if (Object.hasOwn(properties, key) && valid(properties[key])) allowed[key] = properties[key];
-        const body = JSON.stringify({ api_key: settings.publicToken, event, distinct_id: id, properties: { ...allowed, $process_person_profile: false, $geoip_disable: true } });
+        lastTimestamp = Math.max(Date.now(), lastTimestamp + 1);
+        const body = JSON.stringify({ api_key: settings.publicToken, event, distinct_id: id, timestamp: new Date(lastTimestamp).toISOString(), properties: { ...allowed, $process_person_profile: false, $geoip_disable: true } });
         Promise.resolve(env.fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body, credentials: "omit", referrerPolicy: "no-referrer", keepalive: true })).catch(() => {
         });
       } catch {
