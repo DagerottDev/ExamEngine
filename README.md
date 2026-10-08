@@ -275,7 +275,7 @@ Restoration requires persistent IndexedDB storage. A restored timed session keep
 
 ## Local Data and Assessment Boundaries
 
-The RecallForge rename preserves existing browser storage keys and the `examengine-backup` file format, so older workspaces and backups remain compatible. New backup downloads use a `recallforge-backup-` filename. The hosted app moves to `/RecallForge/` on the same origin; bookmarks should use the new address.
+The RecallForge rename preserves existing browser storage keys and the `examengine-backup` file format, so older workspaces and backups remain compatible. New backup downloads use a `recallforge-backup-` filename. The hosted app moves to `/RecallForge/` on the same origin. GitHub repository links redirect, but the old Pages URL returns 404; update bookmarks to the new app address.
 
 Workspace data belongs to the browser profile and site origin (scheme, host, and port). Switching browser/profile, changing a localhost port, moving between the hosted demo and a local file, or clearing site data can make the previous workspace unavailable. Private browsing and browser eviction can also remove data. Keep external backups; requesting persistent storage is not a backup.
 

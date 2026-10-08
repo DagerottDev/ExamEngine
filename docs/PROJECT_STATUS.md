@@ -6,7 +6,7 @@
 
 **Pack schema:** 2.0
 
-**Status date:** 2026-10-06
+**Status date:** 2026-10-08
 
 **Recorded v2 merge:** `e8ac6116330e57b953c2482815cfb027338caa73`
 
@@ -15,6 +15,20 @@
 ## Current state
 
 RecallForge is the new name for the 2.1 study workspace. The current app address is [RecallForge on Pages](https://dagerottdev.github.io/RecallForge/).
+
+## RecallForge rename verification — October 8
+
+- Rename commit `c6370bf1c0b83f582ddf54cfe7631ac0b966b0b3` passed [RecallForge CI and Pages deployment](https://github.com/DagerottDev/RecallForge/actions/runs/37805018564).
+- The new Pages URL returned HTTP 200 and matched the tested single-file distribution byte-for-byte: 4,915,984 bytes; SHA-256 `c34472eba2a704bcec6c16b052b635b8a2fcc7d7f0287d74fac08e7dd286ff09`.
+- All 38 Node tests, 7 Python tests, sample validation, deterministic build freshness, 9 browser storage checks, 15 workflow checks, intercepted production analytics acceptance, and offline backup/PDF/expiry checks passed again for the rename.
+- Existing storage keys, cross-tab channel, deterministic seed defaults, schema identifiers, backup version and `examengine-backup` envelope type are retained for compatibility. New backup filenames, app headings, monogram, error messages, package metadata, docs, generator descriptions and schema titles use RecallForge.
+- The live browser still showed the existing October 6 attempt and revision queue at the new URL. No user workspace was edited or cleared for this check.
+- The GitHub repository name, description, homepage, local remote, and [GitHub profile project links](https://github.com/DagerottDev) are updated. The old repository URL redirects; the old Pages URL returns 404, so app bookmarks need updating.
+- Rename notices were published and verified on [X](https://x.com/Rajveer761SM/status/2108226181913034986) and [r/SideProject](https://www.reddit.com/r/SideProject/comments/1wyf9co/comment/penvdb4/). The original Reddit post body also uses the new name and links; its historical title and URL are retained by Reddit.
+- The PostHog project display name is RecallForge and its dashboard is RecallForge Usage. Analytics project, chart definitions, consent and privacy settings are unchanged. The parent organization display-name edit is separately awaiting approval because it is visible to all organization members.
+- The active local checkout directory is retained at its existing path to preserve this chat's workspace attachment. No project-specific automation references required updating.
+
+## Earlier release evidence
 
 Historical release evidence before the rename: application commit `66eeae1b5c35f7c65e9e4e22c22de74bc5d8aaa7` passed the [verification and deployment workflow](https://github.com/DagerottDev/RecallForge/actions/runs/37476167513). The public HTML returned HTTP 200 and matched the tested local distribution byte-for-byte (4,915,983 bytes; SHA-256 `8d7e207fc8a350e5aa9236aabadf1c8af8ecf2e130095b646cd47307bb88f3e8`). It remains a free, MIT-licensed, static local-first product with optional support links.
 
