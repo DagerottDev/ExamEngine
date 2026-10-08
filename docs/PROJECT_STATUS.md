@@ -25,7 +25,7 @@ RecallForge is the new name for the 2.1 study workspace. The current app address
 - The live browser still showed the existing October 6 attempt and revision queue at the new URL. No user workspace was edited or cleared for this check.
 - The GitHub repository name, description, homepage, local remote, and [GitHub profile project links](https://github.com/DagerottDev) are updated. The old repository URL redirects; the old Pages URL returns 404, so app bookmarks need updating.
 - Rename notices were published and verified on [X](https://x.com/Rajveer761SM/status/2108226181913034986) and [r/SideProject](https://www.reddit.com/r/SideProject/comments/1wyf9co/comment/penvdb4/). The original Reddit post body also uses the new name and links; its historical title and URL are retained by Reddit.
-- The PostHog project display name is RecallForge and its dashboard is RecallForge Usage. Analytics project, chart definitions, consent and privacy settings are unchanged. The parent organization display-name edit is separately awaiting approval because it is visible to all organization members.
+- The PostHog project display name is RecallForge and its dashboard is RecallForge Usage. Analytics project, chart definitions, consent and privacy settings are unchanged. The parent organization display name is also RecallForge, saved with explicit approval and verified after a page reload.
 - The active local checkout directory is retained at its existing path to preserve this chat's workspace attachment. No project-specific automation references required updating.
 
 ## Earlier release evidence
