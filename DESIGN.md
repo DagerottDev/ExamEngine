@@ -1,6 +1,6 @@
 # Design
 
-ExamEngine keeps its incumbent blue, readable study identity. The interface should help a learner stay with a question, understand their next action, and trust what was saved. It uses the existing vanilla HTML/CSS structure and browser-native controls; appearance settings change presentation while preserving pack rules, routes/flows, timing, answers, history, and data safety.
+RecallForge keeps its incumbent blue, readable study identity. The interface should help a learner stay with a question, understand their next action, and trust what was saved. It uses the existing vanilla HTML/CSS structure and browser-native controls; appearance settings change presentation while preserving pack rules, routes/flows, timing, answers, history, and data safety.
 
 ## Visual foundation
 

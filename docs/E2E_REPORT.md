@@ -1,6 +1,6 @@
 # Workspace verification — 2026-10-05
 
-The complete eight-area ExamEngine 2.1 implementation is present in the working tree and verified locally. This report covers the generated single-file viewer, native IndexedDB, actual download files, and a separate `file://` launch. It does not establish a GitHub push, release, or Pages deployment.
+The complete eight-area RecallForge 2.1 implementation is present in the working tree and verified locally. This report covers the generated single-file viewer, native IndexedDB, actual download files, and a separate `file://` launch. It does not establish a GitHub push, release, or Pages deployment.
 
 ## Reproduce
 

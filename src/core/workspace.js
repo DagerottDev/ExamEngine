@@ -380,7 +380,7 @@ export async function createWorkspaceStore({ name = 'exam-engine-workspace', leg
     request.onupgradeneeded = () => request.result.createObjectStore('workspace');
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(new Error(`Could not open persistent storage: ${request.error?.message || 'storage denied'}`));
-    request.onblocked = () => reject(new Error('Storage upgrade is blocked by another ExamEngine tab. Close it and retry.'));
+    request.onblocked = () => reject(new Error('Storage upgrade is blocked by another RecallForge tab. Close it and retry.'));
   });
   database.onversionchange = () => database.close();
   const transaction = (mode, action) => new Promise((resolve, reject) => {

@@ -9,13 +9,13 @@
 [![Python][python-shield]][python-url]
 
 <div align="center">
-  <h1>ExamEngine</h1>
+  <h1>RecallForge</h1>
   <p>A local-first study workspace for question packs, exams, revision, and portable backups.</p>
   <p>
     <a href="docs/ARCHITECTURE.md">Explore the docs</a>
-    · <a href="https://dagerottdev.github.io/ExamEngine/">Open ExamEngine</a>
-    · <a href="https://github.com/DagerottDev/ExamEngine/issues">Report a bug</a>
-    · <a href="https://github.com/DagerottDev/ExamEngine/issues">Request a feature</a>
+    · <a href="https://dagerottdev.github.io/RecallForge/">Open RecallForge</a>
+    · <a href="https://github.com/DagerottDev/RecallForge/issues">Report a bug</a>
+    · <a href="https://github.com/DagerottDev/RecallForge/issues">Request a feature</a>
   </p>
 </div>
 
@@ -56,11 +56,11 @@
 
 ## About The Project
 
-ExamEngine helps learners turn reference material into question packs, take exams offline, and use their results to focus the next study session. It pairs a source-grounded MCQ generator skill with a deterministic browser exam engine.
+RecallForge (formerly ExamEngine) helps learners turn reference material into question packs, take exams offline, and use their results to focus the next study session. It pairs a source-grounded MCQ generator skill with a deterministic browser exam engine.
 
-![ExamEngine study workspace](docs/images/workspace.png)
+![RecallForge study workspace](docs/images/workspace.png)
 
-ExamEngine **2.1** adds eight workspace areas:
+RecallForge **2.1** adds eight workspace areas:
 
 - **Appearance and layout:** focused, compact, or spacious presets; timer and palette placement; themes and accents; separate interface/question fonts; reading size, width, and line height; reduced motion; home-card ordering.
 - **Portable backups:** full-workspace JSON export, optional password encryption, previewed merge or replace, and one restore recovery snapshot.
@@ -95,8 +95,8 @@ No backend, API key, or external service is required to use the built viewer. np
 
 The repository includes a ready-to-open [offline viewer](mcq-exam-website/index.html) and a [nine-question Cell Biology sample pack](mcq-exam-website/sample-mcq-pack.json). Node.js and Python are needed only for development or CLI validation.
 
-Use [ExamEngine online](https://dagerottdev.github.io/ExamEngine/) or save the
-[self-contained HTML](https://dagerottdev.github.io/ExamEngine/index.html) to your
+Use [RecallForge online](https://dagerottdev.github.io/RecallForge/) or save the
+[self-contained HTML](https://dagerottdev.github.io/RecallForge/index.html) to your
 device for offline use. Hosting is free; no login or payment is required.
 
 ### Prerequisites
@@ -111,8 +111,8 @@ device for offline use. Hosting is free; no login or payment is required.
 1. Clone the repository and enter its directory:
 
    ```bash
-   git clone https://github.com/DagerottDev/ExamEngine.git
-   cd ExamEngine
+   git clone https://github.com/DagerottDev/RecallForge.git
+   cd RecallForge
    ```
 
 2. Open `mcq-exam-website/index.html` in your browser. The generated file embeds the styles, JavaScript, and sample pack, so it can run offline without a web server.
@@ -265,7 +265,7 @@ File MIME/signatures, sizes, and SHA-256 hashes are checked. `sourceRefs` remain
 
 Leave both password fields empty for readable JSON. For encryption, enter and confirm a password with at least **12 characters**. Encrypted files use AES-256-GCM with a password-derived key. Passwords are not stored; a forgotten password cannot be recovered. A plain backup contains readable questions, answers, study history, and attachments.
 
-Save the downloaded file to iCloud Drive, Google Drive, another folder, or your own backup system. ExamEngine does not sign in to those providers or synchronize files automatically. On the destination device, open ExamEngine, choose the backup file, enter its password if needed, and inspect the preview:
+Save the downloaded file to iCloud Drive, Google Drive, another folder, or your own backup system. RecallForge does not sign in to those providers or synchronize files automatically. On the destination device, open RecallForge, choose the backup file, enter its password if needed, and inspect the preview:
 
 - **Merge** preserves the current session and local preferences by default. It deduplicates matching records, preserves/remaps conflicts, and rebuilds review state from merged attempts. Tick the preference option to import appearance choices too.
 - **Replace** restores the complete backed-up workspace, including preferences and saved session. Complete/discard a current saved session before replacing it.
@@ -274,6 +274,8 @@ Save the downloaded file to iCloud Drive, Google Drive, another folder, or your 
 Restoration requires persistent IndexedDB storage. A restored timed session keeps its original deadline; restoring or moving devices does not grant extra time. Actual downloads and offline restore were verified in Chromium; broader browser coverage is tracked in [E2E_REPORT](docs/E2E_REPORT.md). Encryption protects the exported file; the working browser database remains local and unencrypted.
 
 ## Local Data and Assessment Boundaries
+
+The RecallForge rename preserves existing browser storage keys and the `examengine-backup` file format, so older workspaces and backups remain compatible. New backup downloads use a `recallforge-backup-` filename. The hosted app moves to `/RecallForge/` on the same origin; bookmarks should use the new address.
 
 Workspace data belongs to the browser profile and site origin (scheme, host, and port). Switching browser/profile, changing a localhost port, moving between the hosted demo and a local file, or clearing site data can make the previous workspace unavailable. Private browsing and browser eviction can also remove data. Keep external backups; requesting persistent storage is not a backup.
 
@@ -285,7 +287,7 @@ The app makes no account-backed upload of your local question packs or attempts.
 
 ## Optional Usage Analytics
 
-On the [production site](https://dagerottdev.github.io/ExamEngine/), an optional notice offers **Allow analytics** and **Don’t allow**. Nothing is sent and no analytics identifier is created before consent. Change your choice under **Settings → Privacy → Usage analytics**. Declining stops new events and removes the identifier; allowing again creates a fresh one. Choices synchronize across tabs and stay separate from backups, restore/undo, and appearance resets.
+On the [production site](https://dagerottdev.github.io/RecallForge/), an optional notice offers **Allow analytics** and **Don’t allow**. Nothing is sent and no analytics identifier is created before consent. Change your choice under **Settings → Privacy → Usage analytics**. Declining stops new events and removes the identifier; allowing again creates a fresh one. Choices synchronize across tabs and stay separate from backups, restore/undo, and appearance resets.
 
 Explicit usage events go to **PostHog Cloud in the US** using native fetch. There is no analytics SDK, automatic click capture, person profile, or recording. Questions, answers, scores, notes, filenames, attachments, workspace/session IDs, passwords, full URLs, and query strings are excluded. A fixed traffic category replaces raw referrer URLs. Requests omit cookies and the HTTP referrer; project IP anonymization is enabled. PostHog still receives the connection needed to process a request.
 
@@ -304,9 +306,9 @@ Explicit usage events go to **PostHog Cloud in the US** using native fetch. Ther
 
 Each payload also includes the public project token, event name, random browser `distinct_id`, action timestamp, and fixed `$process_person_profile: false` / `$geoip_disable: true`. Timestamps preserve action order when requests arrive out of order. Unknown event names and fields are discarded. Success events follow successful action/save boundaries; resume does not emit another start. Screen events follow navigation rather than rendering. `app_opened` is attempted once per page load after consent. Offline/blocked events are dropped without a queue or retry and never delay timers, rendering, or saving. Unavailable browser storage keeps collection off.
 
-Collection is restricted to `https://dagerottdev.github.io/ExamEngine/` and its `index.html` URL. Localhost, previews, forks, other paths, and downloaded `file://` copies do not collect events. [Configuration](src/analytics-config.json) contains only a **public project token**, never an administrative key. Set the token to an empty string and rebuild to disable collection globally.
+Collection is restricted to `https://dagerottdev.github.io/RecallForge/` and its `index.html` URL. Localhost, previews, forks, other paths, and downloaded `file://` copies do not collect events. [Configuration](src/analytics-config.json) contains only a **public project token**, never an administrative key. Set the token to an empty string and rebuild to disable collection globally.
 
-Owners can view the **ExamEngine Usage** dashboard in the dedicated PostHog project (sign-in required). Counts are **consenting browser estimates**, not exact people. Declined consent, offline use, blockers, multiple devices, cleared storage, and consent resets affect totals. Funnels link a browser’s starts and completions, rather than an individual session ID. Seven-day retention needs seven days of collected history; earlier usage cannot be reconstructed. See [the analytics report](docs/USAGE_ANALYTICS.md) for dashboard access and deployment verification.
+Owners can view the **RecallForge Usage** dashboard in the dedicated PostHog project (sign-in required). Counts are **consenting browser estimates**, not exact people. Declined consent, offline use, blockers, multiple devices, cleared storage, and consent resets affect totals. Funnels link a browser’s starts and completions, rather than an individual session ID. Seven-day retention needs seven days of collected history; earlier usage cannot be reconstructed. See [the analytics report](docs/USAGE_ANALYTICS.md) for dashboard access and deployment verification.
 
 ## Development
 
@@ -359,8 +361,8 @@ Pull requests and `goal/**` branches do not deploy. A manual workflow run on
 
 ## Free Hosting
 
-ExamEngine uses static GitHub Pages hosting at
-[dagerottdev.github.io/ExamEngine](https://dagerottdev.github.io/ExamEngine/).
+RecallForge uses static GitHub Pages hosting at
+[dagerottdev.github.io/RecallForge](https://dagerottdev.github.io/RecallForge/).
 The app needs no server, database, or paid hosting subscription.
 
 To host your own fork:
@@ -369,7 +371,7 @@ To host your own fork:
    on GitHub Free.
 2. Open **Settings → Pages → Build and deployment → Source** and select
    **GitHub Actions**.
-3. Push a change to `main`, or run **Actions → ExamEngine CI → Run workflow**
+3. Push a change to `main`, or run **Actions → RecallForge CI → Run workflow**
    on `main`. Tests and validation must pass before deployment.
 4. Find your site URL in **Settings → Pages** or the workflow's `github-pages`
    deployment. A project site normally uses `https://<owner>.github.io/<repo>/`.
@@ -412,7 +414,7 @@ PDF.js retains its Apache-2.0 license; bundled fonts retain their SIL Open Font 
 
 ## Support the Project
 
-ExamEngine is free to use. If it helps your study sessions, you can support its
+RecallForge is free to use. If it helps your study sessions, you can support its
 development:
 
 - [Buy me a coffee](https://buymeacoffee.com/dagerottdev) — international support.
@@ -426,7 +428,7 @@ welcome too.
 
 ## Contact
 
-Use the [ExamEngine repository][repository-url] and [issue tracker][issues-url] for project support.
+Use the [RecallForge repository][repository-url] and [issue tracker][issues-url] for project support.
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
 
@@ -437,8 +439,8 @@ Use the [ExamEngine repository][repository-url] and [issue tracker][issues-url] 
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
 
-[repository-url]: https://github.com/DagerottDev/ExamEngine
-[issues-url]: https://github.com/DagerottDev/ExamEngine/issues
+[repository-url]: https://github.com/DagerottDev/RecallForge
+[issues-url]: https://github.com/DagerottDev/RecallForge/issues
 [javascript-shield]: https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
 [javascript-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
 [html-shield]: https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white
@@ -448,8 +450,8 @@ Use the [ExamEngine repository][repository-url] and [issue tracker][issues-url] 
 [python-shield]: https://img.shields.io/badge/Python-3-3776AB?style=for-the-badge&logo=python&logoColor=white
 [python-url]: https://www.python.org/
 
-[license-shield]: https://img.shields.io/github/license/DagerottDev/ExamEngine?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/DagerottDev/RecallForge?style=for-the-badge
 [license-url]: LICENSE
-[ci-shield]: https://img.shields.io/github/actions/workflow/status/DagerottDev/ExamEngine/ci.yml?branch=main&style=for-the-badge&label=CI
-[ci-url]: https://github.com/DagerottDev/ExamEngine/actions/workflows/ci.yml
+[ci-shield]: https://img.shields.io/github/actions/workflow/status/DagerottDev/RecallForge/ci.yml?branch=main&style=for-the-badge&label=CI
+[ci-url]: https://github.com/DagerottDev/RecallForge/actions/workflows/ci.yml
 [version-shield]: https://img.shields.io/badge/version-2.1.0-1958a4?style=for-the-badge

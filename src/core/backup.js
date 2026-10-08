@@ -64,8 +64,8 @@ export async function validateSource(source) {
 function validateEnvelope(envelope) {
   assertSafeJSON(envelope);
   if (!envelope || Array.isArray(envelope) || typeof envelope !== 'object') throw new Error('Backup must be a JSON object.');
-  if (envelope.type !== 'examengine-backup') throw new Error('This file is not an ExamEngine backup.');
-  if (envelope.backupVersion !== 1) throw new Error('Unsupported backup version. Update ExamEngine to read newer backups.');
+  if (envelope.type !== 'examengine-backup') throw new Error('This file is not a RecallForge backup.');
+  if (envelope.backupVersion !== 1) throw new Error('Unsupported backup version. Update RecallForge to read newer backups.');
   if (typeof envelope.appVersion !== 'string' || !/^2\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(envelope.appVersion)) throw new Error('Unsupported backup application version.');
   if (typeof envelope.exportedAt !== 'string' || !Number.isFinite(Date.parse(envelope.exportedAt))) throw new Error('Backup export date is invalid.');
   const allowed = ['type', 'backupVersion', 'appVersion', 'exportedAt', 'data', 'encryption'];

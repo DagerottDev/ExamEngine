@@ -1,12 +1,12 @@
 ---
 name: mcq-pack-generator
-description: Generates ExamEngine v2 MCQ packs from reference material and sample exam questions, with source grounding, calibrated difficulty, validation, and QA.
+description: Generates RecallForge v2 MCQ packs from reference material and sample exam questions, with source grounding, calibrated difficulty, validation, and QA.
 license: MIT
 ---
 
-# MCQ Pack Generator — ExamEngine v2
+# MCQ Pack Generator — RecallForge v2
 
-Generate high-quality, source-grounded MCQ packs for ExamEngine. The output must conform to `resources/mcq-pack-schema.json` and pass `scripts/validate_pack.py` before completion.
+Generate high-quality, source-grounded MCQ packs for RecallForge. The output must conform to `resources/mcq-pack-schema.json` and pass `scripts/validate_pack.py` before completion.
 
 ## Golden rule
 
@@ -83,7 +83,7 @@ For each question provide:
 
 Distractors must be plausible and from the same conceptual neighborhood as the correct answer. Vary correct-answer positions. Avoid `all of the above` and `none of the above` unless the source paper uses them.
 
-### 6. Assemble ExamEngine v2 metadata
+### 6. Assemble RecallForge v2 metadata
 
 Use:
 
@@ -164,7 +164,7 @@ Tell the user:
 
 ## Adaptive retest requests
 
-ExamEngine can export `adaptive-retest-request` JSON after a completed exam. When the user supplies one, generate a new pack using its `focusTopics`, requested `count`, target difficulty, and source provenance. Do not repeat the prior question stems or merely paraphrase them.
+RecallForge can export `adaptive-retest-request` JSON after a completed exam. When the user supplies one, generate a new pack using its `focusTopics`, requested `count`, target difficulty, and source provenance. Do not repeat the prior question stems or merely paraphrase them.
 
 ## Compatibility
 
@@ -175,7 +175,7 @@ Generate schema v2 only. The browser can migrate old v1 packs for use, but newly
 This skill, its validator, schema, and author-owned examples are MIT licensed;
 keep the included `LICENSE` when copying the entire skill folder. When running
 outside the repository, use `python3 <skill-folder>/scripts/validate_pack.py <pack.json>`.
-Run the skill in your own compatible AI agent; the ExamEngine website does not
+Run the skill in your own compatible AI agent; the RecallForge website does not
 host AI generation. AI service charges depend on the tool/provider you use.
 Use only reference material you have permission to use and share; this license
 does not grant rights to third-party books, papers, or uploaded sources.

@@ -2,16 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { createUsageAnalytics, CONSENT_KEY, IDENTIFIER_KEY } from '../src/core/usage-analytics.js';
-const settings = { publicToken:'phc_test_public_token', origin:'https://dagerottdev.github.io', paths:['/ExamEngine/','/ExamEngine/index.html'] };
+const settings = { publicToken:'phc_test_public_token', origin:'https://dagerottdev.github.io', paths:['/RecallForge/','/RecallForge/index.html'] };
 function fixture(overrides = {}) {
   const storage = new Map(), requests = [];
-  const env = { location:new URL(settings.origin+'/ExamEngine/'), navigator:{onLine:true}, crypto:{randomUUID}, document:{referrer:'https://reddit.com/r/study?private=secret'}, localStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)}, fetch:(url,options)=>{requests.push({url,...options,payload:JSON.parse(options.body)});return Promise.resolve();}, ...overrides };
+  const env = { location:new URL(settings.origin+'/RecallForge/'), navigator:{onLine:true}, crypto:{randomUUID}, document:{referrer:'https://reddit.com/r/study?private=secret'}, localStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)}, fetch:(url,options)=>{requests.push({url,...options,payload:JSON.parse(options.body)});return Promise.resolve();}, ...overrides };
   return { env, storage, requests, analytics:createUsageAnalytics(env,settings) };
 }
 test('analytics is off before consent, denied, offline, unconfigured, and outside exact production URLs', () => {
   const f=fixture();f.analytics.track('session_started',{kind:'study',question_count:3});assert.equal(f.requests.length,0);assert.equal(f.storage.has(IDENTIFIER_KEY),false);
   f.analytics.setConsent('deny');assert.equal(f.requests.length,0);assert.equal(f.storage.has(IDENTIFIER_KEY),false);
-  for(const url of ['http://localhost/ExamEngine/','file:///ExamEngine/index.html','https://fork.github.io/ExamEngine/','https://dagerottdev.github.io/ExamEngine/preview','https://dagerottdev.github.io/ExamEngine-other/']){
+  for(const url of ['http://localhost/RecallForge/','file:///RecallForge/index.html','https://fork.github.io/RecallForge/','https://dagerottdev.github.io/RecallForge/preview','https://dagerottdev.github.io/RecallForge-other/','https://dagerottdev.github.io/ExamEngine/','https://dagerottdev.github.io/ExamEngine/index.html']){
     const local=fixture({location:new URL(url)});local.analytics.setConsent('allow');local.analytics.track('pack_published',{question_count:2});assert.equal(local.requests.length,0);assert.equal(local.storage.has(IDENTIFIER_KEY),false);
   }
   const offline=fixture({navigator:{onLine:false}});offline.analytics.setConsent('allow');assert.equal(offline.requests.length,0);assert.equal(offline.storage.has(IDENTIFIER_KEY),false);

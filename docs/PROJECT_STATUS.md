@@ -1,6 +1,6 @@
 # Project Status
 
-**Project:** ExamEngine
+**Project:** RecallForge
 
 **Current package version:** 2.1.0
 
@@ -10,11 +10,13 @@
 
 **Recorded v2 merge:** `e8ac6116330e57b953c2482815cfb027338caa73`
 
-**CI:** [Workflow runs](https://github.com/DagerottDev/ExamEngine/actions/workflows/ci.yml)
+**CI:** [Workflow runs](https://github.com/DagerottDev/RecallForge/actions/workflows/ci.yml)
 
 ## Current state
 
-ExamEngine 2.1 is pushed to `main` and deployed at the [Pages address](https://dagerottdev.github.io/ExamEngine/). Application commit `66eeae1b5c35f7c65e9e4e22c22de74bc5d8aaa7` passed the [verification and deployment workflow](https://github.com/DagerottDev/ExamEngine/actions/runs/37476167513). The public HTML returned HTTP 200 and matched the tested local distribution byte-for-byte (4,915,983 bytes; SHA-256 `8d7e207fc8a350e5aa9236aabadf1c8af8ecf2e130095b646cd47307bb88f3e8`). It remains a free, MIT-licensed, static local-first product with optional support links.
+RecallForge is the new name for the 2.1 study workspace. The current app address is [RecallForge on Pages](https://dagerottdev.github.io/RecallForge/).
+
+Historical release evidence before the rename: application commit `66eeae1b5c35f7c65e9e4e22c22de74bc5d8aaa7` passed the [verification and deployment workflow](https://github.com/DagerottDev/RecallForge/actions/runs/37476167513). The public HTML returned HTTP 200 and matched the tested local distribution byte-for-byte (4,915,983 bytes; SHA-256 `8d7e207fc8a350e5aa9236aabadf1c8af8ecf2e130095b646cd47307bb88f3e8`). It remains a free, MIT-licensed, static local-first product with optional support links.
 
 Optional, consent-only usage analytics is deployed with the PostHog US Free project and seven-chart private owner dashboard. Questions, answers, scores, notes, sources, and backups stay local. See [USAGE_ANALYTICS](USAGE_ANALYTICS.md) for the payload contract, consent acceptance, native chart definitions, launch QA counts, and retention limits.
 

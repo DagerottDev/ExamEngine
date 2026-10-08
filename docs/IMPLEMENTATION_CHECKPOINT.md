@@ -1,6 +1,6 @@
 # Implementation checkpoint — 2026-10-05
 
-The full ExamEngine 2.1 local study workspace is implemented and deployed. The user explicitly overrode the usual usage reserve for this run. All eight capability areas were retained; no backend or cloud-provider integration was introduced.
+The full RecallForge 2.1 local study workspace is implemented and deployed. The user explicitly overrode the usual usage reserve for this run. All eight capability areas were retained; no backend or cloud-provider integration was introduced.
 
 Current acceptance and its precise browser/platform limits are recorded in [E2E_REPORT](E2E_REPORT.md). Reproducible checks are `npm run verify`, `npm run build`, `npm run build:check`, `npm run test:browser`, and `git diff --check`. Browser evidence is generated under ignored `output/browser/`.
 

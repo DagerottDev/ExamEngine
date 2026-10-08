@@ -1,6 +1,6 @@
 # Architecture
 
-ExamEngine 2.1 keeps the deterministic exam core and adds a local study workspace. The browser runs the app; there is no application server or account database. The deployable artifact remains one generated HTML file. Implementation and acceptance evidence are tracked separately in [PROJECT_STATUS](PROJECT_STATUS.md) and [E2E_REPORT](E2E_REPORT.md).
+RecallForge 2.1 keeps the deterministic exam core and adds a local study workspace. The browser runs the app; there is no application server or account database. The deployable artifact remains one generated HTML file. Implementation and acceptance evidence are tracked separately in [PROJECT_STATUS](PROJECT_STATUS.md) and [E2E_REPORT](E2E_REPORT.md).
 
 ## Component map
 

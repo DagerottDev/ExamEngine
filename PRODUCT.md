@@ -1,6 +1,6 @@
 # Product
 
-ExamEngine is a free local-first study workspace for learners who already have reference material and question packs. It runs as a static browser app or a generated single-file viewer. The central task is to choose what to study, answer questions under clear rules, understand mistakes, and return to a useful review queue.
+RecallForge is a free local-first study workspace for learners who already have reference material and question packs. It runs as a static browser app or a generated single-file viewer. The central task is to choose what to study, answer questions under clear rules, understand mistakes, and return to a useful review queue.
 
 ## Product contract
 

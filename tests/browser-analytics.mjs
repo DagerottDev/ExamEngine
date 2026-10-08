@@ -9,7 +9,7 @@ export async function checkUsageAnalytics(browser, markup, output) {
  const tokenLine=`publicToken: ${JSON.stringify(config.publicToken)}`;
  assert.equal(markup.split(tokenLine).length,2,'Expected one bundled analytics config');
  const html=markup.replace(tokenLine,'publicToken: "phc_browser_fixture"');
- const production='https://dagerottdev.github.io/ExamEngine/';
+ const production='https://dagerottdev.github.io/RecallForge/';
  const endpoint='https://us.i.posthog.com/i/v0/e/';
  const context=await browser.newContext({acceptDownloads:true});
  const events=[],errors=[];let blocked=false;

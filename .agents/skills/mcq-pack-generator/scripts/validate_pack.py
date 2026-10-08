@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate ExamEngine MCQ Pack v2 files (stdlib only)."""
+"""Validate RecallForge MCQ Pack v2 files (stdlib only)."""
 
 import json
 import math

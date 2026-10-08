@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ExamEngine — your study workspace</title>
+  <title>RecallForge — your study workspace</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <div id="landing-view" class="view">
     <main class="landing shell">
       <button class="theme" data-theme-toggle>☾ Dark</button>
-      <div class="brand"><span>EE</span><div><h1>ExamEngine</h1><p>Offline-first exam and adaptive study runner</p></div></div>
+      <div class="brand"><span>RF</span><div><h1>RecallForge</h1><p>Your local-first study workspace</p></div></div>
 
       <section id="resume-card" class="card resume" hidden>
         <div><strong id="resume-title"></strong><p id="resume-meta"></p></div>
@@ -19,7 +19,7 @@
 
       <section id="import-card" class="card">
         <h2>Import a question pack</h2>
-        <button id="drop-zone" class="drop" type="button"><strong>Drop an ExamEngine JSON pack here</strong><span>or click to browse</span></button>
+        <button id="drop-zone" class="drop" type="button"><strong>Drop a RecallForge JSON pack here</strong><span>or click to browse</span></button>
         <input id="file-input" type="file" accept=".json,application/json" hidden>
         <div class="launch-grid">
           <label>Mode<select id="delivery-mode"><option value="pack">Use pack setting</option><option value="exam">Exam</option><option value="study">Study</option></select></label>
@@ -38,10 +38,10 @@
       </section>
 
       <details class="card notebook"><summary>Wrong-answer notebook <span id="notebook-count" class="pill">0</span></summary><ul id="notebook-list"></ul></details>
-      <footer class="support-footer" aria-label="Support ExamEngine">
-        <p>ExamEngine is free and open source. Support is optional.</p>
+      <footer class="support-footer" aria-label="Support RecallForge">
+        <p>RecallForge is free and open source. Support is optional.</p>
         <nav aria-label="Project and support links">
-          <a href="https://github.com/DagerottDev/ExamEngine" target="_blank" rel="noopener noreferrer">Source and generator skill</a>
+          <a href="https://github.com/DagerottDev/RecallForge" target="_blank" rel="noopener noreferrer">Source and generator skill</a>
           <a href="https://buymeacoffee.com/dagerottdev" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
           <a href="https://bondin.io/dagerottdev" target="_blank" rel="noopener noreferrer">Buy me a chai</a>
         </nav>
@@ -83,8 +83,8 @@
       <section class="score-card"><div><span id="result-percent" class="big-score"></span><strong id="result-score"></strong><p id="result-stats"></p></div><div class="row wrap"><button id="retest-btn" class="primary">Retest wrong answers</button><button id="export-adaptive-btn">Adaptive request options</button><button id="export-result-btn">Export result</button><button id="new-exam-btn">New exam</button></div></section>
       <section class="card"><h2>Topic performance</h2><p id="adaptive-summary" class="muted"></p><ul id="weak-topics" class="topic-list"></ul></section>
       <section class="card"><h2>Answer review</h2><div id="review-list"></div></section>
-      <footer class="support-footer" aria-label="Support ExamEngine">
-        <p>Enjoyed your study session? Support ExamEngine's development.</p>
+      <footer class="support-footer" aria-label="Support RecallForge">
+        <p>Enjoyed your study session? Support RecallForge's development.</p>
         <nav aria-label="Support links">
           <a href="https://buymeacoffee.com/dagerottdev" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
           <a href="https://bondin.io/dagerottdev" target="_blank" rel="noopener noreferrer">Buy me a chai</a>

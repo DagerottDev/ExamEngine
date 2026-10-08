@@ -98,7 +98,7 @@ export const track = usageAnalytics.track;
 export function initializeAnalyticsControls() {
   const description = "Optional usage events go to PostHog in the US with a random browser identifier. Questions, answers, scores, notes, attachments, and backups stay local. No recordings or automatic click tracking.";
   const buttons = `<div class="row wrap"><button data-analytics-consent="allow">Allow analytics</button><button data-analytics-consent="deny">Don’t allow</button></div>`;
-  document.querySelector(".workspace-nav").insertAdjacentHTML("beforebegin", `<section id="analytics-notice" class="card" aria-labelledby="analytics-notice-heading" hidden><h2 id="analytics-notice-heading">Help improve ExamEngine?</h2><p>${description} You can change your choice in Settings → Privacy.</p>${buttons}<p id="analytics-notice-status" role="status"></p></section>`);
+  document.querySelector(".workspace-nav").insertAdjacentHTML("beforebegin", `<section id="analytics-notice" class="card" aria-labelledby="analytics-notice-heading" hidden><h2 id="analytics-notice-heading">Help improve RecallForge?</h2><p>${description} You can change your choice in Settings → Privacy.</p>${buttons}<p id="analytics-notice-status" role="status"></p></section>`);
   document.getElementById("settings-panel").insertAdjacentHTML("beforeend", `<section class="card" aria-labelledby="privacy-heading"><h3 id="privacy-heading">Privacy</h3><h4>Usage analytics</h4><p>${description}</p><p id="analytics-status" role="status"></p>${buttons}</section>`);
   function render() {
     const eligible = usageAnalytics.eligible(), consent = usageAnalytics.readConsent();

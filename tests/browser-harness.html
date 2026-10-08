@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><title>ExamEngine browser storage checks</title><style>body{font:16px/1.6 system-ui;max-width:900px;margin:40px auto;padding:20px}li{padding:8px}pre{white-space:pre-wrap}</style><h1>Native browser storage checks</h1><p>Uses isolated temporary databases; your ExamEngine workspace is untouched.</p><ol id="results"></ol><pre id="summary" role="status">Running…</pre><script type="module">
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RecallForge browser storage checks</title><style>body{font:16px/1.6 system-ui;max-width:900px;margin:40px auto;padding:20px}li{padding:8px}pre{white-space:pre-wrap}</style><h1>Native browser storage checks</h1><p>Uses isolated temporary databases; your RecallForge workspace is untouched.</p><ol id="results"></ol><pre id="summary" role="status">Running…</pre><script type="module">
 import {createWorkspaceStore,emptyWorkspace,identifyPack,canonical,sha256} from '../src/core/workspace.js';
 import {createSession} from '../src/core/exam-engine.js';
 import {encodeBackup,decodeBackup} from '../src/core/backup.js';
@@ -6,7 +6,7 @@ const output=document.getElementById('results');let passed=0;
 const assert=(ok,text)=>{if(!ok)throw Error(text);};
 const check=async(title,fn)=>{await fn();passed++;const row=document.createElement('li');row.textContent=`PASS: ${title}`;output.append(row);};
 const sample=await (await fetch('../mcq-exam-website/sample-mcq-pack.json')).json();
-const db=`examengine-test-${crypto.randomUUID()}`;
+const db=`recallforge-test-${crypto.randomUUID()}`;
 const legacy=new Map([['exam-engine:v2:resume',JSON.stringify({pack:sample,session:createSession(sample)})],['exam-engine:v2:history',JSON.stringify([{id:'legacy-attempt',title:'Old exam',date:Date.now(),earned:1,maxMarks:2,percentage:50,weakTopics:['Cells']}])],['exam-engine:v2:notebook',JSON.stringify([{examTitle:'Old exam',questionId:1,question:'Cell note'}])],['exam-engine:v2:theme','dark']]);
 const legacyStorage={getItem:key=>legacy.get(key)||null};
 let store,second;

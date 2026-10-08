@@ -197,7 +197,7 @@ function createWorkspaceUI(api) {
       await save(["session"]);
       await saveQueueReady();
       const backup = await encodeBackup(deepClone(ws()), password);
-      download(`examengine-backup-${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10)}.json`, backup);
+      download(`recallforge-backup-${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10)}.json`, backup);
       track("backup_exported", {encrypted: Boolean(password)});
       $("backup-password").value = $("backup-confirm").value = "";
       notify("Backup downloaded. Save it to your chosen drive or folder.");
